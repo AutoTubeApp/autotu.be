@@ -39,8 +39,27 @@
           </v-icon>
         </v-toolbar-items>
       </nuxtLink>
-
       <v-toolbar-title>AutoTube</v-toolbar-title>
+      <v-spacer />
+      <v-text-field solo dense hide-details label="Rechercher" />
+      <v-btn dense>
+        <v-icon>
+          mdi-magnify
+        </v-icon>
+      </v-btn>
+      <v-spacer />
+      <v-icon>
+        mdi-movie-plus
+      </v-icon>
+      <v-icon class="ml-5">
+        mdi-bell
+      </v-icon>
+      <v-avatar size="34" class="ml-5">
+        <img
+          alt="toorop"
+          src="dev/avatar.jpg"
+        >
+      </v-avatar>
     </v-app-bar>
     <v-main>
       <v-container>
