@@ -69,8 +69,9 @@
     <v-footer
       absolute
       app
+      class="justify-center"
     >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+      <span>&copy; {{ new Date().getFullYear() }} <a href="https://dpp.st">dpp.st</a> </span>
     </v-footer>
   </v-app>
 </template>
