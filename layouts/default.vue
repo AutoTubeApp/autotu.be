@@ -61,10 +61,8 @@
         >
       </v-avatar>
     </v-app-bar>
-    <v-main>
-      <v-container>
-        <Nuxt />
-      </v-container>
+    <v-main class="pa-8 mt-15">
+      <Nuxt />
     </v-main>
     <v-footer
       absolute
