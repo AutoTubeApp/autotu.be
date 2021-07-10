@@ -48,8 +48,8 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class VideoThumb extends Vue {
-  readonly imgSrcDefault: string = '/dev/thumbnail.webp'
-  readonly imgSrcPreviewDefault: string = '/dev/thumbnail-preview.webp'
+  readonly imgSrcDefault: string = '/dev/toreilles.png'
+  readonly imgSrcPreviewDefault: string = '/dev/toreilles.webp'
 
   imgSrc: string = this.imgSrcDefault
   imgLazySrc: string = this.imgSrcDefault
