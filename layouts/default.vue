@@ -54,12 +54,20 @@
       <v-icon class="ml-5">
         mdi-bell
       </v-icon>
-      <v-avatar size="34" class="ml-5">
+      <v-avatar v-if="user.login !==undefined" size="34" class="ml-5">
         <img
-          alt="toorop"
+          :alt="user.login"
           src="dev/avatar.jpg"
         >
       </v-avatar>
+      <v-btn
+        v-else
+        class="ml-5"
+        color="primary"
+        outlined
+      >
+        Se connecter
+      </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -76,35 +84,45 @@
   </v-app>
 </template>
 
-<script>
-export default {
-  data () {
-    return {
-      drawer: false,
-      items: [
-        {
-          icon: 'mdi-home',
-          title: 'Accueil',
-          to: '/'
-        },
-        {
-          icon: 'mdi-compass',
-          title: 'Explorer',
-          to: '/explore'
-        },
-        {
-          icon: 'mdi-youtube-subscription',
-          title: 'Abonnements',
-          to: '/feed/sub'
-        },
-        {
-          icon: 'mdi-filmstrip-box-multiple',
-          title: 'Bibliothèque',
-          to: '/feed/sub'
-        }
-      ]
+<script lang="ts">
+
+import { Component, namespace, Vue } from 'nuxt-property-decorator'
+import { IUser } from '~/types/user'
+
+const user = namespace('user')
+
+@Component
+export default class Default extends Vue {
+  public drawer: boolean = false
+  public items: any[] = [
+    {
+      icon: 'mdi-home',
+      title: 'Accueil',
+      to: '/'
+    },
+    {
+      icon: 'mdi-compass',
+      title: 'Explorer',
+      to: '/explore'
+    },
+    {
+      icon: 'mdi-youtube-subscription',
+      title: 'Abonnements',
+      to: '/feed/sub'
+    },
+    {
+      icon: 'mdi-filmstrip-box-multiple',
+      title: 'Bibliothèque',
+      to: '/feed/sub'
     }
-  }
+  ]
+
+  // state
+  @user.State
+  public user!: IUser
+
+  // hook
+  mounted () {}
 }
 </script>
 
