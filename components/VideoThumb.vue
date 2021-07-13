@@ -33,7 +33,7 @@
         </v-avatar>
       </v-col>
       <v-col class="pl-0">
-        <h4>J'ai acheté un van !!!</h4>
+        <h4>Torreilles - mai 2021</h4>
         <a class="subtitle" spellcheck="false" href="/c/toorop" dir="auto">Toorop</a>
         <p class="subtitle">
           10K vues &#8226; Il y à 16 heures
@@ -44,22 +44,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class VideoThumb extends Vue {
-  readonly imgSrcDefault: string = '/dev/toreilles.png'
-  readonly imgSrcPreviewDefault: string = '/dev/toreilles.webp'
+  // Data
+  readonly imgLazySrc: string = '/dev/toreilles.png'
 
-  imgSrc: string = this.imgSrcDefault
-  imgLazySrc: string = this.imgSrcDefault
+  imgSrc: string = ''
 
+  // Props
+  @Prop({ required: true }) readonly thumbSrc!: string
+  @Prop({ required: true }) readonly animThumSrc!: string
+
+  created () {
+    this.imgSrc = this.thumbSrc
+  }
+
+  // methods
   handleImgHover (): void {
-    this.imgSrc = this.imgSrcPreviewDefault
+    this.imgSrc = this.animThumSrc
   }
 
   handleImgOut (): void {
-    this.imgSrc = this.imgSrcDefault
+    this.imgSrc = this.thumbSrc
   }
 }
 </script>

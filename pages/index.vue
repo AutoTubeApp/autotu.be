@@ -8,16 +8,27 @@
       md="3"
       sm="6"
     >
-      <VideoThumb />
+      <VideoThumb
+        thumb-src="/dev/toreilles.png"
+        anim-thum-src="/dev/toreilles.webp"
+      />
     </v-col>
   </v-row>
 </template>
 
 <script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+import VideoThumb from '~/components/VideoThumb.vue'
 
-export default {
-  name: 'Index'
+@Component({
+  components: {
+    VideoThumb
+  }
+})
+export default class Index extends Vue {
+
 }
+
 </script>
 
 <style scoped>
