@@ -9,7 +9,8 @@ import { IUser } from '~/types/user'
 
 export default class User extends VuexModule {
   public user:IUser = {
-    login: undefined
+    login: undefined,
+    avatar: 'dev/avatar.jpg'
   }
 
   @Mutation

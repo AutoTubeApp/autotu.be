@@ -48,23 +48,25 @@
         </v-icon>
       </v-btn>
       <v-spacer />
-      <v-icon>
+
+      <v-icon v-if="user.login !==undefined">
         mdi-movie-plus
       </v-icon>
-      <v-icon class="ml-5">
+      <v-icon v-if="user.login !==undefined" class="ml-5">
         mdi-bell
       </v-icon>
       <v-avatar v-if="user.login !==undefined" size="34" class="ml-5">
         <img
           :alt="user.login"
-          src="dev/avatar.jpg"
+          :src="user.avatar"
         >
       </v-avatar>
       <v-btn
-        v-else
+        v-if="user.login === undefined"
         class="ml-5"
-        color="primary"
+        color="blue darken-1"
         outlined
+        @click="login"
       >
         Se connecter
       </v-btn>
@@ -121,8 +123,17 @@ export default class Default extends Vue {
   @user.State
   public user!: IUser
 
+  @user.Mutation
+  public updateUser!: (data: IUser) => void
+
   // hook
   mounted () {}
+
+  // methods
+  public login ():void {
+    // this.user.login = 'toorop'
+    this.updateUser({ login: 'toorop' })
+  }
 }
 </script>
 
