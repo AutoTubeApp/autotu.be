@@ -2,7 +2,7 @@
   <div class="pr-2 pl-2 ">
     <v-row class="d-flex pointer">
       <v-img
-        :src="imgSrc"
+        :src="imgSrc || thumbSrc"
         :lazy-src="imgLazySrc"
         aspect-ratio="16/9"
         class="grey lighten-2"
@@ -55,15 +55,11 @@ export default class VideoThumb extends Vue {
 
   // Props
   @Prop({ required: true }) readonly thumbSrc!: string
-  @Prop({ required: true }) readonly animThumSrc!: string
-
-  created () {
-    this.imgSrc = this.thumbSrc
-  }
+  @Prop({ required: true }) readonly animThumbSrc!: string
 
   // methods
   handleImgHover (): void {
-    this.imgSrc = this.animThumSrc
+    this.imgSrc = this.animThumbSrc
   }
 
   handleImgOut (): void {
