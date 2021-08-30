@@ -66,7 +66,7 @@
         class="ml-5"
         color="blue darken-1"
         outlined
-        @click="login"
+        to="/auth"
       >
         <v-icon left>
           mdi-account-circle-outline

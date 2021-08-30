@@ -10,7 +10,7 @@
     >
       <VideoThumb
         thumb-src="/dev/toreilles.png"
-        anim-thum-src="/dev/toreilles.webp"
+        anim-thumb-src="/dev/toreilles.webp"
       />
     </v-col>
   </v-row>
