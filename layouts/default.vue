@@ -68,6 +68,9 @@
         outlined
         @click="login"
       >
+        <v-icon left>
+          mdi-account-circle-outline
+        </v-icon>
         Se connecter
       </v-btn>
     </v-app-bar>
@@ -127,11 +130,11 @@ export default class Default extends Vue {
   public updateUser!: (data: IUser) => void
 
   // hook
-  mounted () {}
+  mounted () {
+  }
 
   // methods
-  public login ():void {
-    // this.user.login = 'toorop'
+  public login (): void {
     this.updateUser({ login: 'toorop' })
   }
 }

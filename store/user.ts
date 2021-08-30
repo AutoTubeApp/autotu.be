@@ -2,13 +2,13 @@ import { Module, VuexModule, Mutation } from 'vuex-module-decorators'
 import { IUser } from '~/types/user'
 
 @Module({
-  name: 'user',
+  name: 'userStore',
   stateFactory: true,
   namespaced: true
 })
 
-export default class User extends VuexModule {
-  public user:IUser = {
+export default class UserStore extends VuexModule {
+  public user: IUser = {
     login: undefined,
     avatar: 'dev/avatar.jpg'
   }
