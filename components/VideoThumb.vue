@@ -29,13 +29,13 @@
         <v-avatar size="36">
           <img
             alt="toorop"
-            src="dev/avatar.jpg"
+            src="/dev/avatar.jpg"
           >
         </v-avatar>
       </v-col>
       <v-col class="pl-0">
         <h4>Torreilles - mai 2021</h4>
-        <a class="subtitle" spellcheck="false" href="/c/toorop" dir="auto">Toorop</a>
+        <a class="subtitle" href="#" dir="auto">Toorop</a>
         <p class="subtitle">
           10K vues &#8226; Il y à 16 heures
         </p>
@@ -58,8 +58,6 @@ export default class VideoThumb extends Vue {
   imgSrc: string = this.thumbSrc || this.imgLazySrc
 
   mounted () {
-    console.log('mounted')
-    console.log(this.imgSrc, this.thumbSrc)
     this.imgSrc = this.thumbSrc
   }
 
@@ -71,15 +69,6 @@ export default class VideoThumb extends Vue {
   handleImgOut (): void {
     this.imgSrc = this.thumbSrc
   }
-
-  // computed
-  /*
-  get computedImgSrc (): string {
-    console.log('get computed')
-    return this.thumbSrc
-  }
-
-   */
 }
 </script>
 
