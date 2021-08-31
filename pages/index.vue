@@ -9,7 +9,7 @@
       sm="6"
     >
       <VideoThumb
-        thumb-src="/dev/toreilles.png"
+        thumb-src="/dev/thumbnail.webp"
         anim-thumb-src="/dev/toreilles.webp"
       />
     </v-col>
