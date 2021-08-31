@@ -54,7 +54,7 @@ export default class VideoThumb extends Vue {
   @Prop({ required: true }) readonly animThumbSrc!: string
 
   // Data
-  readonly imgLazySrc: string = '/dev/toreilles.png'
+  readonly imgLazySrc: string = '/dev/thumbnail.webp'
   imgSrc: string = this.thumbSrc || this.imgLazySrc
 
   mounted () {
