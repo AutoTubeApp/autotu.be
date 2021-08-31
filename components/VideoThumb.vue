@@ -4,7 +4,8 @@
       <v-img
         :src="imgSrc || thumbSrc"
         :lazy-src="imgLazySrc"
-        aspect-ratio="16/9"
+        :aspect-ratio="16/9"
+        :width="720"
         class="grey lighten-2"
         @mouseover="handleImgHover"
         @mouseout="handleImgOut"
