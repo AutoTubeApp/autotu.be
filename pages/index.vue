@@ -26,7 +26,6 @@ import VideoThumb from '~/components/VideoThumb.vue'
   }
 })
 export default class Index extends Vue {
-
 }
 
 </script>

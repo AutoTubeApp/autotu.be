@@ -48,14 +48,19 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class VideoThumb extends Vue {
-  // Data
-  readonly imgLazySrc: string = '/dev/toreilles.png'
-
-  imgSrc: string = ''
-
   // Props
   @Prop({ required: true }) readonly thumbSrc!: string
   @Prop({ required: true }) readonly animThumbSrc!: string
+
+  // Data
+  readonly imgLazySrc: string = '/dev/toreilles.png'
+  imgSrc: string = this.thumbSrc || this.imgLazySrc
+
+  mounted () {
+    console.log('mounted')
+    console.log(this.imgSrc, this.thumbSrc)
+    this.imgSrc = this.thumbSrc
+  }
 
   // methods
   handleImgHover (): void {
@@ -65,6 +70,15 @@ export default class VideoThumb extends Vue {
   handleImgOut (): void {
     this.imgSrc = this.thumbSrc
   }
+
+  // computed
+  /*
+  get computedImgSrc (): string {
+    console.log('get computed')
+    return this.thumbSrc
+  }
+
+   */
 }
 </script>
 
