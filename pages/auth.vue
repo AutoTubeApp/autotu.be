@@ -52,24 +52,40 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class Auth extends Vue {
   valid: boolean = false
-  email: string = ''
+  email: string = 'toorop@gmail.com'
   emailRules: any = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  password: string = ''
+  password: string = 'azerty'
   passwordRules: any = [
     (v: string) => !!v || 'Password is required'
   ]
 
   // methods
-  checkForm (): void {
+  async checkForm (): Promise<void> {
     const isValid = (this.$refs.form as Vue & { validate: () => boolean }).validate()
     if (!isValid) {
       return
     }
+    // auth request
+    // eslint-disable-next-line no-console
     console.log('auth in progress')
+    const response: any = await this.$auth.loginWith('local', {
+      data: {
+        username: this.email,
+        password: this.password
+      }
+    })
+      .catch((err: any) => {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      })
+    // eslint-disable-next-line no-console
+    console.log('response')
+    // eslint-disable-next-line no-console
+    console.log(response)
   }
 }
 </script>
