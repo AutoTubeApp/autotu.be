@@ -55,12 +55,33 @@
       <v-icon v-if="$auth.loggedIn" class="ml-5">
         mdi-bell
       </v-icon>
-      <v-avatar v-if="$auth.loggedIn" size="34" class="ml-5">
-        <img
-          :alt="$auth.user.username"
-          :src="$auth.user.avatar"
-        >
-      </v-avatar>
+      <v-menu v-if="$auth.loggedIn" offset-y>
+        <template #activator="{ on, attrs }">
+          <v-avatar
+            size="34"
+            class="ml-5"
+            v-bind="attrs"
+            v-on="on"
+          >
+            <img
+              :alt="$auth.user.username"
+              :src="$auth.user.avatar"
+            >
+          </v-avatar>
+        </template>
+        <v-list>
+          <v-list-item
+            @click="logout"
+          >
+            <v-list-item-icon>
+              <v-icon>mdi-exit-to-app</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-btn
         v-if="!$auth.loggedIn"
         class="ml-5"
@@ -71,7 +92,7 @@
         <v-icon left>
           mdi-account-circle-outline
         </v-icon>
-        Se connecter
+        Sign in
       </v-btn>
     </v-app-bar>
     <v-main>
@@ -136,6 +157,10 @@ export default class Default extends Vue {
   // methods
   public login (): void {
     this.updateUser({ login: 'toorop' })
+  }
+
+  public logout (): void {
+    this.$auth.logout()
   }
 }
 </script>

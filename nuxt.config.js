@@ -108,10 +108,7 @@ export default {
             url: '/api/session',
             method: 'post'
           },
-          logout: {
-            url: '/api/session',
-            method: 'delete'
-          },
+          logout: false,
           user: {
             url: '/api/user',
             method: 'get'
