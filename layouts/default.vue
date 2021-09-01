@@ -49,20 +49,20 @@
       </v-btn>
       <v-spacer />
 
-      <v-icon v-if="user.login !==undefined">
+      <v-icon v-if="$auth.loggedIn">
         mdi-movie-plus
       </v-icon>
-      <v-icon v-if="user.login !==undefined" class="ml-5">
+      <v-icon v-if="$auth.loggedIn" class="ml-5">
         mdi-bell
       </v-icon>
-      <v-avatar v-if="user.login !==undefined" size="34" class="ml-5">
+      <v-avatar v-if="$auth.loggedIn" size="34" class="ml-5">
         <img
-          :alt="user.login"
-          :src="user.avatar"
+          :alt="$auth.user.username"
+          :src="$auth.user.avatar"
         >
       </v-avatar>
       <v-btn
-        v-if="user.login === undefined"
+        v-if="!$auth.loggedIn"
         class="ml-5"
         color="blue darken-1"
         outlined

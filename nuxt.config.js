@@ -95,13 +95,13 @@ export default {
       local: {
         token: {
           property: 'token',
-          global: true
-          // required: true,
-          // type: 'Bearer'
+          global: true,
+          required: true,
+          type: 'Bearer'
         },
         user: {
-          property: 'user'
-          // autoFetch: true
+          property: 'user',
+          autoFetch: true
         },
         endpoints: {
           login: {

@@ -87,6 +87,7 @@ export default class Auth extends Vue {
     console.log('response')
     // eslint-disable-next-line no-console
     console.log(response)
+    console.log(this.$auth.user)
   }
 }
 </script>

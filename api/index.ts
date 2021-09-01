@@ -31,7 +31,7 @@ app.post('/session', (req: express.Request, res: express.Response) => {
   if (email !== 'toorop@gmail.com' || password !== 'azerty') {
     res.status(401).send('auth failed')
   }
-  const expiresIn: number = 15
+  const expiresIn: string = '24h'
   // const refreshToken: string = 'r' + Math.floor(Math.random() * (1000000000000000 - 1 + 1)) + 1
   const accessToken = jsonwebtoken.sign(
     {
@@ -45,12 +45,14 @@ app.post('/session', (req: express.Request, res: express.Response) => {
       expiresIn
     }
   )
-
   res.json({
-    token: {
-      accessToken
-    }
+    token: accessToken
   })
+})
+
+// get user
+app.get('/user', (req: express.Request, res: express.Response) => {
+  res.json({ user: req.user })
 })
 
 // export
