@@ -27,7 +27,9 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/node",
-      "@nuxtjs/auth-next"
+      "@nuxtjs/auth-next",
+      "@types/express-jwt",
+      "@types/jsonwebtoken"
     ]
   },
   "exclude": [

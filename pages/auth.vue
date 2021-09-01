@@ -48,18 +48,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { HTTPResponse } from '@nuxtjs/auth-next'
 
 @Component
 export default class Auth extends Vue {
   valid: boolean = false
   email: string = 'toorop@gmail.com'
-  emailRules: any = [
+  emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
   password: string = 'azerty'
-  passwordRules: any = [
+  passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required'
   ]
 
@@ -72,9 +73,9 @@ export default class Auth extends Vue {
     // auth request
     // eslint-disable-next-line no-console
     console.log('auth in progress')
-    const response: any = await this.$auth.loginWith('local', {
+    const response: void | HTTPResponse = await this.$auth.loginWith('local', {
       data: {
-        username: this.email,
+        email: this.email,
         password: this.password
       }
     })
