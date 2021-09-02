@@ -1,5 +1,5 @@
 import { Action, Module, VuexModule, Mutation } from 'vuex-module-decorators'
-import { snackbarProps } from '@/components/Snackbar.vue'
+import { SnackbarProps } from '@/components/Snackbar.vue'
 
 @Module({
   stateFactory: true,
@@ -7,26 +7,32 @@ import { snackbarProps } from '@/components/Snackbar.vue'
 })
 
 export default class SnackbarStore extends VuexModule {
-  public sbProps: snackbarProps = {
-    visible: false,
-    text: '',
-    color: 'success'
+  public sbProps: SnackbarProps = {
+    visible: false
   }
 
   @Mutation
-  public updateSnackbar (props: snackbarProps): void {
+  public updateSnackbar (props: SnackbarProps): void {
     this.sbProps = { ...this.sbProps, ...props }
   }
 
   // show snackbar
-  @Action({ rawError: true })
-  public showSnackbar (text: string, color: string = 'success'): void {
+  @Action
+  public showSnackbar (payload: { color: string, text: string }): void {
     this.context.commit('updateSnackbar', {
-      text,
-      color,
+      text: payload.text,
+      color: payload.color ?? 'blue darken-1',
       visible: true
     })
     // timeout
-    setTimeout(() => this.context.commit('updateSnackbar', { visible: false }), 5000)
+    setTimeout(() => this.context.commit('updateSnackbar', {
+      visible: false
+    }), 5000)
+  }
+
+  // hide snackbar
+  @Action
+  public hideSnackbar (): void {
+    this.context.commit('updateSnackbar', { visible: false })
   }
 }

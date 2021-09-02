@@ -29,7 +29,8 @@ app.post('/session', (req: express.Request, res: express.Response) => {
 
   // check auth
   if (email !== 'toorop@gmail.com' || password !== 'azerty') {
-    res.status(401).send('auth failed')
+    res.status(401).send('authentification failed')
+    return
   }
   const expiresIn: string = '24h'
   // const refreshToken: string = 'r' + Math.floor(Math.random() * (1000000000000000 - 1 + 1)) + 1
@@ -38,7 +39,7 @@ app.post('/session', (req: express.Request, res: express.Response) => {
       uuid: '72bb9529-3cf5-4127-98ab-8426d59c5ac3',
       username: 'Toorop',
       email,
-      avatar: 'dev/avatar.jpg'
+      avatar: '/dev/avatar.jpg'
     },
     secret,
     {

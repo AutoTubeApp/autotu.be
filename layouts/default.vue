@@ -113,11 +113,8 @@
 
 <script lang="ts">
 
-import { Component, namespace, Vue } from 'nuxt-property-decorator'
-import { IUser } from '~/types/user'
+import { Component, Vue } from 'nuxt-property-decorator'
 import Snackbar from '~/components/Snackbar.vue'
-
-const user = namespace('user')
 
 @Component({
   components: {
@@ -145,25 +142,9 @@ export default class Default extends Vue {
     {
       icon: 'mdi-filmstrip-box-multiple',
       title: 'Library',
-      to: '/feed/sub'
+      to: '/feed/library'
     }
   ]
-
-  // state
-  @user.State
-  public user!: IUser
-
-  @user.Mutation
-  public updateUser!: (data: IUser) => void
-
-  // hook
-  mounted () {
-  }
-
-  // methods
-  public login (): void {
-    this.updateUser({ login: 'toorop' })
-  }
 
   public logout (): void {
     this.$auth.logout()

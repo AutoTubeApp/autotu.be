@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
-import { HTTPResponse } from '@nuxtjs/auth-next'
+// import { HTTPResponse } from '@nuxtjs/auth-next'
 
 const NsSnackbarStore = namespace('snackbarStore')
 
@@ -56,7 +56,10 @@ const NsSnackbarStore = namespace('snackbarStore')
 export default class Auth extends Vue {
   // store
   @NsSnackbarStore.Action
-  public showSnackbar!: (msg: string, color?: string) => void
+  public showSnackbar!: (payload: { text: string, color?: string }) => void
+
+  @NsSnackbarStore.Action
+  public hideSnackbar!: () => void
 
   // data & validators
   valid: boolean = false
@@ -78,8 +81,8 @@ export default class Auth extends Vue {
       return
     }
     // auth request
-    this.showSnackbar('auth in progress')
-    const response: void | HTTPResponse = await this.$auth.loginWith('local', {
+    // const response: void | HTTPResponse =
+    await this.$auth.loginWith('local', {
       data: {
         email: this.email,
         password: this.password
@@ -87,13 +90,22 @@ export default class Auth extends Vue {
     })
       .catch((err: any) => {
         // eslint-disable-next-line no-console
-        console.error(err)
+        let message: string
+        switch (err.response.status) {
+          case 401:
+            message = 'Authentification failed !'
+            break
+          case 500:
+            message = 'Internal server error - try again later'
+            break
+          default:
+            message = 'Ooops something went wrong: ' + err.response.status
+        }
+        this.showSnackbar({
+          text: message,
+          color: 'error'
+        })
       })
-    // eslint-disable-next-line no-console
-    console.log('response')
-    // eslint-disable-next-line no-console
-    console.log(response)
-    console.log(this.$auth.user)
   }
 }
 </script>
