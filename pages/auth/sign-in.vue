@@ -29,8 +29,12 @@
           required
         />
         <v-row class="mt-3 pl-3">
-          <a class="mr-4" href="#">Create account</a>
-          <a href="#">Password lost</a>
+          <nuxt-link class="mr-4" to="/auth/create-account">
+            Create account
+          </nuxt-link>
+          <nuxt-link to="/auth/password-lost">
+            Password lost
+          </nuxt-link>
           <v-spacer />
           <v-btn
             :disabled="!valid"

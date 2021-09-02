@@ -88,7 +88,7 @@
         class="ml-5"
         color="blue darken-1"
         outlined
-        to="/auth"
+        to="/auth/sign-in"
       >
         <v-icon left>
           mdi-account-circle-outline
