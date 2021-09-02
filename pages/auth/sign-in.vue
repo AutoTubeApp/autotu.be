@@ -67,13 +67,13 @@ export default class Auth extends Vue {
 
   // data & validators
   valid: boolean = false
-  email: string = 'toorop@gmail.com'
+  email: string = ''
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  password: string = 'azerty'
+  password: string = ''
   passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required'
   ]
