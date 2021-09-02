@@ -65,20 +65,20 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class CreateAccount extends Vue {
   public valid: boolean = false
-  public email: string = ''
+  public email: string = 'toorop@gmail.com '
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public password: string = ''
+  public password: string = 'azertyuiop'
   public passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length > 8) || 'Password length must be of 8-15',
     (v: string) => v.length <= 15 || 'Password length must be of 8-15'
   ]
 
-  public tos: boolean = false
+  public tos: boolean = true
 
   public tosRules: ((v: boolean) => string | boolean)[] = [
     (v: boolean) => v || 'You must agree to terms and conditions'
@@ -90,7 +90,10 @@ export default class CreateAccount extends Vue {
     if (!isValid) {
       return
     }
-    console.log('is valid')
+    this.$axios.post('/api/user', {
+      email: this.email.trim(),
+      password: this.password.trim()
+    }).catch(e => console.log(e.response))
   }
 }
 </script>
