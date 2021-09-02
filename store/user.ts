@@ -2,7 +2,7 @@ import { Module, VuexModule, Mutation } from 'vuex-module-decorators'
 import { IUser } from '~/types/user'
 
 @Module({
-  name: 'userStore',
+  // name: 'userStore',
   stateFactory: true,
   namespaced: true
 })

@@ -1,5 +1,6 @@
 <template>
   <v-app dark>
+    <Snackbar />
     <v-navigation-drawer
       v-model="drawer"
       clipped
@@ -114,31 +115,36 @@
 
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import { IUser } from '~/types/user'
+import Snackbar from '~/components/Snackbar.vue'
 
 const user = namespace('user')
 
-@Component
+@Component({
+  components: {
+    Snackbar
+  }
+})
 export default class Default extends Vue {
   public drawer: boolean = false
   public items: any[] = [
     {
       icon: 'mdi-home',
-      title: 'Accueil',
+      title: 'Home',
       to: '/'
     },
     {
       icon: 'mdi-compass',
-      title: 'Explorer',
+      title: 'Explore',
       to: '/explore'
     },
     {
       icon: 'mdi-youtube-subscription',
-      title: 'Abonnements',
+      title: 'Subscriptions',
       to: '/feed/sub'
     },
     {
       icon: 'mdi-filmstrip-box-multiple',
-      title: 'Bibliothèque',
+      title: 'Library',
       to: '/feed/sub'
     }
   ]

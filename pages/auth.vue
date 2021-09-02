@@ -47,11 +47,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import { HTTPResponse } from '@nuxtjs/auth-next'
+
+const NsSnackbarStore = namespace('snackbarStore')
 
 @Component
 export default class Auth extends Vue {
+  // store
+  @NsSnackbarStore.Action
+  public showSnackbar!: (msg: string, color?: string) => void
+
+  // data & validators
   valid: boolean = false
   email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
@@ -71,8 +78,7 @@ export default class Auth extends Vue {
       return
     }
     // auth request
-    // eslint-disable-next-line no-console
-    console.log('auth in progress')
+    this.showSnackbar('auth in progress')
     const response: void | HTTPResponse = await this.$auth.loginWith('local', {
       data: {
         email: this.email,
