@@ -25,12 +25,7 @@
 
 <script lang="ts">
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
-
-export interface SnackbarProps {
-  visible?: boolean
-  text?: string
-  color?: string
-}
+import { SnackbarProps } from '~/store/snackbarStore'
 
 const NsSnackbarStore = namespace('snackbarStore')
 

@@ -1,12 +1,15 @@
 import { Action, Module, VuexModule, Mutation } from 'vuex-module-decorators'
-// @ts-ignore
-import { SnackbarProps } from '@/components/Snackbar.vue'
+
+export interface SnackbarProps {
+  visible?: boolean
+  text?: string
+  color?: string
+}
 
 @Module({
   stateFactory: true,
   namespaced: true
 })
-
 export default class SnackbarStore extends VuexModule {
   public sbProps: SnackbarProps = {
     visible: false
