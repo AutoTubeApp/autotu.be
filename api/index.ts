@@ -1,16 +1,27 @@
+import dotenv from 'dotenv'
 import express from 'express'
 import bodyParser from 'body-parser'
 import jwt from 'express-jwt'
-import { getUser, newSession, postUser, secret } from './handlers/auth'
+import { getUser, newSession, postUser } from './handlers/auth'
 
-// import cookieParser from 'cookie-parser'
+const path = require('path')
+
+// get config
+dotenv.config({ path: path.join(__dirname, `.env.${process.env.NODE_ENV}`) })
+
+// ensure config
+const secret = process.env.JWT_SECRET
+if (secret === undefined) {
+  throw new Error('JWT_SECRET not found in ENV')
+}
+
 const app = express()
 
 // Middlewares
 app.use(bodyParser.json())
 app.use(
   jwt({
-    secret,
+    secret: process.env.JWT_SECRET!,
     algorithms: ['sha1', 'RS256', 'HS256']
   }).unless({
     path: ['/api/session',

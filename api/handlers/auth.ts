@@ -2,11 +2,9 @@ import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
 
-// secret
-export const secret: string = 'mybigsecret'
-
 // register new user
 export const postUser = (req: express.Request, res: express.Response) => {
+  // ensure method
   if (req.method !== 'POST') {
     res.status(405)
     return
@@ -38,6 +36,7 @@ export const postUser = (req: express.Request, res: express.Response) => {
     res.status(response.code).json(response)
     return
   }
+
   res.status(200).json(response)
 }
 
@@ -67,7 +66,7 @@ export const newSession = (req: express.Request, res: express.Response) => {
       email,
       avatar: '/dev/avatar.jpg'
     },
-    secret,
+    process.env.JWT_SECRET!,
     {
       expiresIn
     }
