@@ -1,6 +1,8 @@
 import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
+import { logger } from '../logger'
+import { IJsonResponse } from '~/api/types'
 
 // register new user
 export const postUser = (req: express.Request, res: express.Response) => {
@@ -17,6 +19,8 @@ export const postUser = (req: express.Request, res: express.Response) => {
     email,
     password
   } = req.body
+
+  logger.info(`new user ${email}`)
 
   // validate
   let valid = false

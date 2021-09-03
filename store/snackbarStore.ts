@@ -1,4 +1,5 @@
 import { Action, Module, VuexModule, Mutation } from 'vuex-module-decorators'
+// @ts-ignore
 import { SnackbarProps } from '@/components/Snackbar.vue'
 
 @Module({

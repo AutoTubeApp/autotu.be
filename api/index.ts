@@ -1,13 +1,9 @@
-import dotenv from 'dotenv'
 import express from 'express'
 import bodyParser from 'body-parser'
 import jwt from 'express-jwt'
 import { getUser, newSession, postUser } from './handlers/auth'
-
-const path = require('path')
-
-// get config
-dotenv.config({ path: path.join(__dirname, `.env.${process.env.NODE_ENV}`) })
+import './config'
+import { logger } from './logger'
 
 // ensure config
 const secret = process.env.JWT_SECRET
@@ -32,6 +28,8 @@ app.use(
   })
 )
 
+logger.info('logger initialized')
+
 // register a new user
 app.post('/user', postUser)
 
@@ -40,6 +38,12 @@ app.get('/user', getUser)
 
 // authentification
 app.post('/session', newSession)
+
+// logger middleware
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error(`${err.status || 500} - ${res.statusMessage} - ${err.message} - ${err.stack} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+  res.status(500).send('Oops!')
+})
 
 // export
 export default {
