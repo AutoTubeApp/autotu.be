@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import jwt from 'express-jwt'
 import { getUser, newSession, postUser } from './handlers/auth'
 import './config'
-import { logger } from './logger'
+import logger from './logger'
 
 // ensure config
 const secret = process.env.JWT_SECRET
@@ -40,9 +40,10 @@ app.get('/user', getUser)
 app.post('/session', newSession)
 
 // logger middleware
-app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error(`${err.status || 500} - ${res.statusMessage} - ${err.message} - ${err.stack} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
   res.status(500).send('Oops!')
+  next()
 })
 
 // export

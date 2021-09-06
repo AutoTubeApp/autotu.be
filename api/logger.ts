@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'development') {
   })
 }
 
-export const logger = createLogger({
+const logger = createLogger({
   transports: [
     transport
   ],
@@ -20,3 +20,5 @@ export const logger = createLogger({
     format.printf((info: Logform.TransformableInfo) => `${info.level}: ${[info.timestamp]}: ${info.message}`)
   )
 })
+
+export default logger
