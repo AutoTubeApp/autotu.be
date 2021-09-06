@@ -1,49 +1,89 @@
 import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
-import { compare } from 'bcrypt'
+import { compare, hash } from 'bcrypt'
+import { v4 as uuidV4 } from 'uuid'
 import logger from '../logger'
 import Db from '../Db'
 import { IJsonResponse } from '~/api/types'
 
 // register new user
-export const postUser = (req: express.Request, res: express.Response) => {
-  // ensure method
-  if (req.method !== 'POST') {
-    res.status(405)
-    return
+export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    // ensure method
+    if (req.method !== 'POST') {
+      res.status(405)
+      return
+    }
+
+    const response: IJsonResponse = { code: 200 }
+
+    // get email and passwd
+    let {
+      email,
+      // eslint-disable-next-line prefer-const
+      password
+    } = req.body
+
+    // validate
+    if (!email || !password) {
+      response.code = 400
+      response.msg = 'Bad request'
+      logger.info(`${req.ip}: missing params in POST session`)
+      res.status(response.code).json(response)
+      return
+    }
+
+    email = email.toLowerCase()
+
+    let valid = false
+    if (!validator.isEmail(email)) {
+      response.code = 400
+      response.msg = `'${email}' is not a valid email`
+    } else if (!validator.isLength(password, {
+      min: 8,
+      max: 20
+    })) {
+      response.code = 400
+      response.msg = 'password must be between 6 and 20 chars'
+    } else {
+      valid = true
+    }
+    if (!valid) {
+      res.status(response.code).json(response)
+      return
+    }
+
+    // create user
+    // todo envoyer un mail
+    // todo, on component, get user and redirect
+    const hashedPassword = await hash(password, 10)
+    const userID = uuidV4()
+    const db = Db.getInstance()
+    db.session.run(
+      'CREATE (n:User {email: $email, password: $hashedPassword, uuid: $uuid})',
+      {
+        email,
+        hashedPassword,
+        uuid: userID
+      }
+    )
+      .then(() => {
+        logger.info(`new user ${email}`)
+        res.status(200).json(response)
+      })
+      .catch((e) => {
+        if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
+          response.code = 400
+          response.msg = `${email} is already registered`
+          res.status(response.code).json(response)
+          return
+        }
+        throw e
+      })
+  } catch (e) {
+    next(e)
   }
-
-  const response: IJsonResponse = { code: 200 }
-
-  // get email and passwd
-  const {
-    email,
-    password
-  } = req.body
-
-  logger.info(`new user ${email}`)
-
-  // validate
-  let valid = false
-  if (!validator.isEmail(email)) {
-    response.code = 400
-    response.msg = `'${email}' is not a valid email`
-  } else if (!validator.isLength(password, {
-    min: 8,
-    max: 20
-  })) {
-    response.code = 400
-    response.msg = 'password must be between 6 and 20 chars'
-  } else {
-    valid = true
-  }
-  if (!valid) {
-    res.status(response.code).json(response)
-    return
-  }
-
-  res.status(200).json(response)
 }
 
 // get user
@@ -57,6 +97,10 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     email,
     password
   } = req.body
+
+  // todo check email and password
+
+  // todo email to lower case
 
   try {
     // get db instance
@@ -94,7 +138,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
         email,
         avatar: '/dev/avatar.jpg'
       },
-      process.env.JWT_SECRET!,
+      process.env.ATT_JWT_SECRET!,
       {
         expiresIn
       }

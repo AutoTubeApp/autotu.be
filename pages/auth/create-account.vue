@@ -60,18 +60,20 @@
 
 <script lang="ts">
 
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, namespace, Vue } from 'nuxt-property-decorator'
+
+const NsSnackbarStore = namespace('snackbarStore')
 
 @Component
 export default class CreateAccount extends Vue {
   public valid: boolean = false
-  public email: string = 'toorop@gmail.com '
+  public email: string = ''
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public password: string = 'azertyuiop'
+  public password: string = ''
   public passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length > 8) || 'Password length must be of 8-15',
@@ -84,6 +86,13 @@ export default class CreateAccount extends Vue {
     (v: boolean) => v || 'You must agree to terms and conditions'
   ]
 
+  // store
+  @NsSnackbarStore.Action
+  public showSnackbar!: (payload: { text: string, color?: string }) => void
+
+  @NsSnackbarStore.Action
+  public hideSnackbar!: () => void
+
   // methods
   public handleForm (): void {
     const isValid = (this.$refs.form as Vue & { validate: () => boolean }).validate()
@@ -93,11 +102,18 @@ export default class CreateAccount extends Vue {
     this.$axios.post('/api/user', {
       email: this.email.trim(),
       password: this.password.trim()
-    }).catch(e => console.log(e.response))
+    }).catch((e) => {
+      let message: string
+      if (e.response.status === 400) {
+        message = e.response.data.msg
+      } else {
+        message = 'Oops something went wrong: ' + e.response.status
+      }
+      this.showSnackbar({
+        text: message,
+        color: 'error'
+      })
+    })
   }
 }
 </script>
-
-<style scoped>
-
-</style>

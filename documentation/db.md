@@ -29,4 +29,10 @@ MATCH (n) RETURN n
 MATCH (n) DETACH DELETE n
 ```
 
+#### Create constraint
 
+```shell
+CREATE CONSTRAINT uniq_email IF NOT EXISTS
+ON (n:User)
+ASSERT n.email IS UNIQUE
+```

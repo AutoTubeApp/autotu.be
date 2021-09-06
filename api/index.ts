@@ -6,9 +6,9 @@ import './config'
 import logger from './logger'
 
 // ensure config
-const secret = process.env.JWT_SECRET
+const secret = process.env.ATT_JWT_SECRET
 if (secret === undefined) {
-  throw new Error('JWT_SECRET not found in ENV')
+  throw new Error('ATT_JWT_SECRET not found in ENV')
 }
 
 const app = express()
@@ -17,7 +17,7 @@ const app = express()
 app.use(bodyParser.json())
 app.use(
   jwt({
-    secret: process.env.JWT_SECRET!,
+    secret: process.env.ATT_JWT_SECRET!,
     algorithms: ['sha1', 'RS256', 'HS256']
   }).unless({
     path: ['/api/session',
@@ -40,10 +40,9 @@ app.get('/user', getUser)
 app.post('/session', newSession)
 
 // logger middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(`${err.status || 500} - ${res.statusMessage} - ${err.message} - ${err.stack} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
   res.status(500).send('Oops!')
-  next()
 })
 
 // export

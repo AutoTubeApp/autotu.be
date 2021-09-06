@@ -24,6 +24,7 @@
     "neo4j-driver": "^4.3.3",
     "nuxt": "^2.15.7",
     "nuxt-property-decorator": "^2.9.1",
+    "uuid": "^8.3.2",
     "validator": "^13.6.0",
     "vuetify": "^2.5.5",
     "winston": "^3.3.3"
@@ -38,6 +39,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/express-jwt": "^6.0.2",
     "@types/jsonwebtoken": "^8.5.5",
+    "@types/uuid": "^8.3.1",
     "@types/validator": "^13.6.3",
     "@vue/test-utils": "^1.2.1",
     "babel-core": "7.0.0-bridge.0",
