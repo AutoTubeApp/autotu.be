@@ -1,6 +1,7 @@
 import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
+import { compare } from 'bcrypt'
 import logger from '../logger'
 import Db from '../Db'
 import { IJsonResponse } from '~/api/types'
@@ -64,15 +65,21 @@ export const newSession = async (req: express.Request, res: express.Response, ne
       email
     })
     if (r.records.length !== 1) {
-      logger.info(`${req.ip} : auth failed for ${email} - no such user`)
+      logger.info(`${req.ip}: auth failed for ${email} - no such user`)
       res.status(401).send('authentification failed')
       return
     }
 
-    res.status(500).send('FAKE !')
+    // dev create hash
+    // const hashed = await hash(password, 10)
+    // console.log('hash: ' + hashed)
 
-    // check auth
-    if (email !== 'toorop@gmail.com' || password !== 'azerty') {
+    // ok get password from DB
+    const inDbHash = r.records[0].get('user').properties.password
+    const isMatch = await compare(password, inDbHash)
+
+    if (!isMatch) {
+      logger.info(`${req.ip}: auth failed for ${email} - bad password`)
       res.status(401).send('authentification failed')
       return
     }
