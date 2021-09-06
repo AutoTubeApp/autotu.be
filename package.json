@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-jwt": "^6.1.0",
     "jsonwebtoken": "^8.5.1",
+    "neo4j-driver": "^4.3.3",
     "nuxt": "^2.15.7",
     "nuxt-property-decorator": "^2.9.1",
     "validator": "^13.6.0",
