@@ -93,20 +93,8 @@ export default class Auth extends Vue {
       }
     })
       .catch((err: any) => {
-        // eslint-disable-next-line no-console
-        let message: string
-        switch (err.response.status) {
-          case 401:
-            message = 'Authentification failed !'
-            break
-          case 500:
-            message = 'Internal server error - try again later'
-            break
-          default:
-            message = 'Ooops something went wrong: ' + err.response.status
-        }
         this.showSnackbar({
-          text: message,
+          text: err.response.data?.message || 'Oops something went wrong',
           color: 'error'
         })
       })

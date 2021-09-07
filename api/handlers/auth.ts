@@ -3,9 +3,10 @@ import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
 import { compare, hash } from 'bcrypt'
 import { v4 as uuidV4 } from 'uuid'
+import { IJsonResponse } from '../types'
+import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
 import Db from '../Db'
-import { IJsonResponse } from '~/api/types'
 
 // register new user
 export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -91,8 +92,10 @@ export const getUser = (req: express.Request, res: express.Response) => {
   res.json({ user: req.user })
 }
 
-// new session
+// new session (sign in)
 export const newSession = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const response = new ApiResponse()
+
   const {
     email,
     password
@@ -109,14 +112,13 @@ export const newSession = async (req: express.Request, res: express.Response, ne
       email
     })
     if (r.records.length !== 1) {
-      logger.info(`${req.ip}: auth failed for ${email} - no such user`)
-      res.status(401).send('authentification failed')
+      response.httpStatus = 401
+      response.logMessage = `auth failed for ${email} - no such user`
+      response.userMessage = 'authentification failed'
+      res.locals.response = response
+      next()
       return
     }
-
-    // dev create hash
-    // const hashed = await hash(password, 10)
-    // console.log('hash: ' + hashed)
 
     // ok get password from DB
     const inDbHash = r.records[0].get('user').properties.password
@@ -143,6 +145,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
         expiresIn
       }
     )
+    logger.info(`${req.ip}: ${email} sign in`)
     res.json({
       token: accessToken
     })

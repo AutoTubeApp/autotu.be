@@ -4,6 +4,7 @@ import jwt from 'express-jwt'
 import { getUser, newSession, postUser } from './handlers/auth'
 import './config'
 import logger from './logger'
+import { handleResponse } from './middlewares/handleResponse'
 
 // ensure config
 const secret = process.env.ATT_JWT_SECRET
@@ -39,7 +40,10 @@ app.get('/user', getUser)
 // authentification
 app.post('/session', newSession)
 
-// logger middleware
+// response handler middleware
+app.use(handleResponse)
+
+// ultimate error handler middleware
 app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(`${err.status || 500} - ${res.statusMessage} - ${err.message} - ${err.stack} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
   res.status(500).send('Oops!')
