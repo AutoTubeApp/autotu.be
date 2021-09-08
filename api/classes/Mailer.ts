@@ -22,7 +22,7 @@ export class Mailer {
     }
 
     // sender name
-    this.senderName = process.env.ATT_SIB_SENDER_EMAIL
+    this.senderName = process.env.ATT_SIB_SENDER_NAME
     if (this.senderName === undefined) {
       throw new Error('ATT_SIB_SENDER_NAME not found in ENV')
     }
