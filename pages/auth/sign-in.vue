@@ -52,7 +52,6 @@
 
 <script lang="ts">
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
-// import { HTTPResponse } from '@nuxtjs/auth-next'
 
 const NsSnackbarStore = namespace('snackbarStore')
 
@@ -92,9 +91,13 @@ export default class Auth extends Vue {
         password: this.password
       }
     })
+      // real type of err is Error | AxiosError
+      // but to have shorter code we set it to any
+      // and use err.response?.data?.message (AxiosError)
+      // or default message (Error)
       .catch((err: any) => {
         this.showSnackbar({
-          text: err.response.data?.message || 'Oops something went wrong',
+          text: err.response?.data?.message || 'Oops something went wrong',
           color: 'error'
         })
       })
