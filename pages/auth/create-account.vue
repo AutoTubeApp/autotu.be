@@ -28,9 +28,13 @@
           label="Choose a password"
           required
         />
-
+        <v-checkbox
+          v-model="subscribe2nl"
+          label="Get last Autotube news, subscribe to our newsletter."
+        />
         <v-checkbox
           v-model="tos"
+          class="mt-0"
           :rules="tosRules"
         >
           <template #label>
@@ -39,9 +43,11 @@
               <nuxt-link to="tos">
                 terms and conditions
               </nuxt-link>
+              .
             </div>
           </template>
         </v-checkbox>
+
         <v-row class="mt-3 pl-3">
           <v-spacer />
           <v-btn
@@ -81,6 +87,7 @@ export default class CreateAccount extends Vue {
   ]
 
   public tos: boolean = false
+  public subscribe2nl: boolean = false
 
   public tosRules: ((v: boolean) => string | boolean)[] = [
     (v: boolean) => v || 'You must agree to terms and conditions'
@@ -101,7 +108,8 @@ export default class CreateAccount extends Vue {
     }
     this.$axios.post('/api/user', {
       email: this.email.trim(),
-      password: this.password.trim()
+      password: this.password.trim(),
+      subscribe2nl
     })
       .catch((err: any) => {
         this.showSnackbar({

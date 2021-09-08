@@ -6,6 +6,7 @@ import { v4 as uuidV4 } from 'uuid'
 import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
 import Db from '../Db'
+import { Mailer } from '../classes/Mailer'
 
 // register new user
 export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -52,28 +53,36 @@ export const postUser = async (req: express.Request, res: express.Response, next
     // create user
     // todo envoyer un mail
     // todo, on component, get user and redirect
-    const hashedPassword = await hash(password, 10)
-    const userID = uuidV4()
-    const db = Db.getInstance()
-    db.session.run(
-      'CREATE (n:User {email: $email, password: $hashedPassword, uuid: $uuid})',
-      {
-        email,
-        hashedPassword,
-        uuid: userID
+    // const hashedPassword = await hash(password, 10)
+    // const userID = uuidV4()
+    // const activationCode = uuidV4()
+    // const db = Db.getInstance()
+    try {
+      // await db.session.run(
+      //   'CREATE (n:User {email: $email, password: $hashedPassword, uuid: $uuid, emailVerified: $emailVerified, activationCode: $activationCode})',
+      //   {
+      //     email,
+      //     hashedPassword,
+      //     uuid: userID,
+      //     emailVerified: false,
+      //     activationCode
+      //   }
+      // )
+      // todo send welcome email with validation
+
+      const mailer = new Mailer()
+      await mailer.sendMail('toorop@gmail.com', 'Welcome to Autotube', 'hello, to activate your account, click on the link below.')
+
+      logger.info(`new user ${email}`)
+    } catch (e) {
+      if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
+        res.locals.response = response.setResponse(400, `${email} is already registered`)
+        next()
+      } else {
+        next(e)
       }
-    )
-      .then(() => {
-        logger.info(`new user ${email}`)
-      })
-      .catch((e) => {
-        if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
-          res.locals.response = response.setResponse(400, `${email} is already registered`)
-          next()
-          return
-        }
-        throw e
-      })
+      return
+    }
   } catch (e) {
     next(e)
   }
