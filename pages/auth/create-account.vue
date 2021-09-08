@@ -80,7 +80,7 @@ export default class CreateAccount extends Vue {
     (v: string) => v.length <= 15 || 'Password length must be of 8-15'
   ]
 
-  public tos: boolean = true
+  public tos: boolean = false
 
   public tosRules: ((v: boolean) => string | boolean)[] = [
     (v: boolean) => v || 'You must agree to terms and conditions'
@@ -102,18 +102,13 @@ export default class CreateAccount extends Vue {
     this.$axios.post('/api/user', {
       email: this.email.trim(),
       password: this.password.trim()
-    }).catch((e) => {
-      let message: string
-      if (e.response.status === 400) {
-        message = e.response.data.msg
-      } else {
-        message = 'Oops something went wrong: ' + e.response.status
-      }
-      this.showSnackbar({
-        text: message,
-        color: 'error'
-      })
     })
+      .catch((err: any) => {
+        this.showSnackbar({
+          text: err.response?.data?.message || 'Oops something went wrong',
+          color: 'error'
+        })
+      })
   }
 }
 </script>

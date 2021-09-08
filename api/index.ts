@@ -29,8 +29,6 @@ app.use(
   })
 )
 
-logger.info('logger initialized')
-
 // register a new user
 app.post('/user', postUser)
 

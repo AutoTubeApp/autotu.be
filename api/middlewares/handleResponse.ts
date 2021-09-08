@@ -4,7 +4,7 @@ import { LogLevel } from '../types'
 import { ApiResponse } from '../classes/ApiResponse'
 
 export const handleResponse = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  // fallback if no response object
+  // ignore if no response object
   if (!res.locals.response) {
     next()
     return

@@ -3,21 +3,20 @@ import jsonwebtoken from 'jsonwebtoken'
 import validator from 'validator'
 import { compare, hash } from 'bcrypt'
 import { v4 as uuidV4 } from 'uuid'
-import { IJsonResponse } from '../types'
 import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
 import Db from '../Db'
 
 // register new user
 export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const response = new ApiResponse()
+
   try {
     // ensure method
     if (req.method !== 'POST') {
       res.status(405)
       return
     }
-
-    const response: IJsonResponse = { code: 200 }
 
     // get email and passwd
     let {
@@ -28,30 +27,25 @@ export const postUser = async (req: express.Request, res: express.Response, next
 
     // validate
     if (!email || !password) {
-      response.code = 400
-      response.msg = 'Bad request'
-      logger.info(`${req.ip}: missing params in POST session`)
-      res.status(response.code).json(response)
+      res.locals.response = response.setResponse(400, 'Bad request', 1, `${req.ip}: missing params in POST session`)
+      next()
       return
     }
 
     email = email.toLowerCase()
 
-    let valid = false
+    let message: string | null = null
     if (!validator.isEmail(email)) {
-      response.code = 400
-      response.msg = `'${email}' is not a valid email`
+      message = `'${email}' is not a valid email`
     } else if (!validator.isLength(password, {
       min: 8,
       max: 20
     })) {
-      response.code = 400
-      response.msg = 'password must be between 6 and 20 chars'
-    } else {
-      valid = true
+      message = 'password must be between 6 and 20 chars'
     }
-    if (!valid) {
-      res.status(response.code).json(response)
+    if (message) {
+      res.locals.response = response.setResponse(400, message, 1, 'missing params in POST session')
+      next()
       return
     }
 
@@ -71,13 +65,11 @@ export const postUser = async (req: express.Request, res: express.Response, next
     )
       .then(() => {
         logger.info(`new user ${email}`)
-        res.status(200).json(response)
       })
       .catch((e) => {
         if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
-          response.code = 400
-          response.msg = `${email} is already registered`
-          res.status(response.code).json(response)
+          res.locals.response = response.setResponse(400, `${email} is already registered`)
+          next()
           return
         }
         throw e
@@ -87,7 +79,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
   }
 }
 
-// get user
+// get user from JWT
 export const getUser = (req: express.Request, res: express.Response) => {
   res.json({ user: req.user })
 }
@@ -112,10 +104,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
       email
     })
     if (r.records.length !== 1) {
-      response.httpStatus = 401
-      response.logMessage = `auth failed for ${email} - no such user`
-      response.userMessage = 'authentification failed'
-      res.locals.response = response
+      res.locals.response = response.setResponse(401, 'authentification failed', 1, `auth failed for ${email} - no such user`)
       next()
       return
     }
@@ -125,8 +114,8 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     const isMatch = await compare(password, inDbHash)
 
     if (!isMatch) {
-      logger.info(`${req.ip}: auth failed for ${email} - bad password`)
-      res.status(401).send('authentification failed')
+      res.locals.response = response.setResponse(401, 'authentification failed', 1, `auth failed for ${email} - bad password`)
+      next()
       return
     }
 
@@ -145,7 +134,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
         expiresIn
       }
     )
-    logger.info(`${req.ip}: ${email} sign in`)
+    logger.info(`${req.ip}: ${email} sign in `)
     res.json({
       token: accessToken
     })
