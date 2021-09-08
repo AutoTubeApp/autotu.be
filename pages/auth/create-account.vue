@@ -109,7 +109,7 @@ export default class CreateAccount extends Vue {
     this.$axios.post('/api/user', {
       email: this.email.trim(),
       password: this.password.trim(),
-      subscribe2nl
+      subscribe2nl: this.subscribe2nl
     })
       .catch((err: any) => {
         this.showSnackbar({
