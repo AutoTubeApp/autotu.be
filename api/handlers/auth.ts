@@ -27,8 +27,19 @@ export const postUser = async (req: express.Request, res: express.Response, next
       // create user
       user = await User.Create(email, password, subscribe)
       // send welcome email
-      await user.SendWelcomeEmail()
-      // todo subscribe to newsletter
+      try {
+        await user.sendWelcomeEmail()
+      } catch (e) {
+        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
+      }
+      // subscribe to newsletter
+      if (subscribe) {
+        try {
+          await user.subscribeToNewsletter()
+        } catch (e) {
+          logger.error(`${req.ip}: hdl postUser - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
+        }
+      }
     } catch (e) {
       if (e instanceof AttError) {
         res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)

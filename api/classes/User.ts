@@ -3,7 +3,7 @@ import validator from 'validator'
 import { hash } from 'bcrypt'
 import Db from '../Db'
 import { AttError } from './Error'
-import { Mailer } from './Mailer'
+import { SendInBlue } from './SendInBlue'
 
 // const waitForOneSecond = (): Promise<string> => {
 //   return new Promise((resolve) => {
@@ -65,8 +65,13 @@ export class User {
   }
 
   // send welcome email
-  public async SendWelcomeEmail (): Promise<void> {
-    const mailer = new Mailer()
-    await mailer.sendTemplatedMail(this.email, 1, { validationId: this.validationId })
+  public async sendWelcomeEmail (): Promise<void> {
+    const sib = new SendInBlue()
+    await sib.sendTemplatedMail(this.email, 1, { validationId: this.validationId })
+  }
+
+  public async subscribeToNewsletter (): Promise<void> {
+    const sib = new SendInBlue()
+    await sib.subscribeToNewsletter(this.email, 2)
   }
 }
