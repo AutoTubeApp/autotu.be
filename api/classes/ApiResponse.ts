@@ -9,7 +9,7 @@ export class ApiResponse {
 
   public constructor () {
     this.httpStatus = 200
-    this.logLevel = 1 // info
+    this.logLevel = LogLevel.info // info
   }
 
   // return response formatted for client

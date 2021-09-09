@@ -73,13 +73,13 @@ const NsSnackbarStore = namespace('snackbarStore')
 @Component
 export default class CreateAccount extends Vue {
   public valid: boolean = false
-  public email: string = ''
+  public email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public password: string = ''
+  public password: string = 'azertyazerty'
   public passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length > 8) || 'Password length must be of 8-15',
@@ -109,7 +109,7 @@ export default class CreateAccount extends Vue {
     this.$axios.post('/api/user', {
       email: this.email.trim(),
       password: this.password.trim(),
-      subscribe2nl: this.subscribe2nl
+      subscribe: this.subscribe2nl
     })
       .catch((err: any) => {
         this.showSnackbar({
@@ -117,6 +117,8 @@ export default class CreateAccount extends Vue {
           color: 'error'
         })
       })
+
+    // get user and redirect
   }
 }
 </script>

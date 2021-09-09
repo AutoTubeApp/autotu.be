@@ -1,5 +1,6 @@
 import { SendSmtpEmail, TransactionalEmailsApi, TransactionalEmailsApiApiKeys } from '@sendinblue/client'
-import logger from '../logger'
+
+// import logger from '../logger'
 
 export class Mailer {
   private readonly senderEmail: string | undefined
@@ -31,24 +32,33 @@ export class Mailer {
     this.sibClient.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey)
   }
 
-  // sendmail
-  public async sendMail (to: string, subject: string, body: string) {
+  // send raw mail
+  // public async sendMail (to: string, subject: string, body: string) {
+  //   const email = new SendSmtpEmail()
+  //   email.to = [{ email: to }]
+  //   email.subject = subject
+  //   email.sender = {
+  //     email: this.senderEmail,
+  //     name: this.senderName
+  //   }
+  //   email.replyTo = {
+  //     email: this.senderEmail!,
+  //     name: this.senderName
+  //   }
+  //   email.templateId = 1
+  //   email.params = { validationId: 'iddevalitation' }
+  //
+  //   logger.info('sending mail')
+  //   await this.sibClient.sendTransacEmail(email)
+  //   logger.info('mail send')
+  // }
+
+  // send templated mail
+  public async sendTemplatedMail (to: string, templateId: number, params?: object): Promise<void> {
     const email = new SendSmtpEmail()
     email.to = [{ email: to }]
-    email.subject = subject
-    email.sender = {
-      email: this.senderEmail,
-      name: this.senderName
-    }
-    email.replyTo = {
-      email: this.senderEmail!,
-      name: this.senderName
-    }
-    email.templateId = 1
-    email.params = { validationid: 'iddevalitation' }
-
-    logger.info('sending mail')
+    email.templateId = templateId
+    email.params = params
     await this.sibClient.sendTransacEmail(email)
-    logger.info('mail send')
   }
 }

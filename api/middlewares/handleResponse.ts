@@ -22,7 +22,7 @@ export const handleResponse = (req: express.Request, res: express.Response, next
         logger.debug(r.logMessage)
         break
       case LogLevel.info:
-        logger.error(r.logMessage)
+        logger.info(r.logMessage)
         break
       case LogLevel.error:
         logger.error(r.logMessage)

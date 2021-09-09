@@ -1,88 +1,45 @@
 import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
-import validator from 'validator'
-import { compare, hash } from 'bcrypt'
-import { v4 as uuidV4 } from 'uuid'
+import { compare } from 'bcrypt'
 import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
 import Db from '../Db'
-import { Mailer } from '../classes/Mailer'
+import { User } from '../classes/User'
+import { AttError } from '../classes/Error'
 
 // register new user
 export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
 
   try {
-    // ensure method
-    if (req.method !== 'POST') {
-      res.status(405)
-      return
-    }
-
     // get email and passwd
-    let {
+    const {
       email,
       // eslint-disable-next-line prefer-const
-      password
+      password,
+      // eslint-disable-next-line prefer-const
+      subscribe
     } = req.body
 
-    // validate
-    if (!email || !password) {
-      res.locals.response = response.setResponse(400, 'Bad request', 1, `${req.ip}: missing params in POST session`)
-      next()
-      return
-    }
+    let user: User
 
-    email = email.toLowerCase()
-
-    let message: string | null = null
-    if (!validator.isEmail(email)) {
-      message = `'${email}' is not a valid email`
-    } else if (!validator.isLength(password, {
-      min: 8,
-      max: 20
-    })) {
-      message = 'password must be between 6 and 20 chars'
-    }
-    if (message) {
-      res.locals.response = response.setResponse(400, message, 1, 'missing params in POST session')
-      next()
-      return
-    }
-
-    // create user
-    // todo envoyer un mail
-    // todo, on component, get user and redirect
-    // const hashedPassword = await hash(password, 10)
-    // const userID = uuidV4()
-    // const activationCode = uuidV4()
-    // const db = Db.getInstance()
     try {
-      // await db.session.run(
-      //   'CREATE (n:User {email: $email, password: $hashedPassword, uuid: $uuid, emailVerified: $emailVerified, activationCode: $activationCode})',
-      //   {
-      //     email,
-      //     hashedPassword,
-      //     uuid: userID,
-      //     emailVerified: false,
-      //     activationCode
-      //   }
-      // )
-      // todo send welcome email with validation
-
-      const mailer = new Mailer()
-      await mailer.sendMail('toorop@gmail.com', 'Welcome to Autotube', 'hello, to activate your account, click on the link below.')
-
-      logger.info(`new user ${email}`)
+      // create user
+      user = await User.Create(email, password, subscribe)
+      // send welcome email
+      await user.SendWelcomeEmail()
+      // todo subscribe to newsletter
     } catch (e) {
-      if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
-        res.locals.response = response.setResponse(400, `${email} is already registered`)
+      if (e instanceof AttError) {
+        res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
         next()
       } else {
         next(e)
       }
       return
     }
+    logger.info(`user.create: new user ${user.email} - ${user.uuid}`)
+    res.status(201).send()
   } catch (e) {
     next(e)
   }
