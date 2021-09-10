@@ -73,13 +73,13 @@ const NsSnackbarStore = namespace('snackbarStore')
 @Component
 export default class CreateAccount extends Vue {
   public valid: boolean = false
-  public email: string = 'toorop@gmail.com'
+  public email: string = ''
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public password: string = 'azertyazerty'
+  public password: string = ''
   public passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length > 8) || 'Password length must be of 8-15',
@@ -101,22 +101,33 @@ export default class CreateAccount extends Vue {
   public hideSnackbar!: () => void
 
   // methods
-  public handleForm (): void {
+  public async handleForm (): Promise<void> {
     const isValid = (this.$refs.form as Vue & { validate: () => boolean }).validate()
     if (!isValid) {
       return
     }
-    this.$axios.post('/api/user', {
-      email: this.email.trim(),
-      password: this.password.trim(),
-      subscribe: this.subscribe2nl
-    })
-      .catch((err: any) => {
-        this.showSnackbar({
-          text: err.response?.data?.message || 'Oops something went wrong',
-          color: 'error'
-        })
+
+    try {
+      await this.$axios.post('/api/user', {
+        email: this.email.trim(),
+        password: this.password.trim(),
+        subscribe: this.subscribe2nl
       })
+
+      // auth request
+      // const response: void | HTTPResponse =
+      await this.$auth.loginWith('local', {
+        data: {
+          email: this.email,
+          password: this.password
+        }
+      })
+    } catch (e) {
+      this.showSnackbar({
+        text: e.response?.data?.message || 'Oops something went wrong',
+        color: 'error'
+      })
+    }
 
     // get user and redirect
   }
