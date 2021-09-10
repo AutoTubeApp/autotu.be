@@ -1,7 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import jwt from 'express-jwt'
-import { getUser, newSession, postUser } from './handlers/auth'
+import * as hdlAuth from './handlers/auth'
 import './config'
 import logger from './logger'
 import { handleResponse } from './middlewares/handleResponse'
@@ -30,13 +30,16 @@ app.use(
 )
 
 // register a new user
-app.post('/user', postUser)
+app.post('/user', hdlAuth.postUser)
 
 // get user
-app.get('/user', getUser)
+app.get('/user', hdlAuth.getUser)
 
 // authentification
-app.post('/session', newSession)
+app.post('/session', hdlAuth.newSession)
+
+// email validation
+app.put('/validate-email', hdlAuth.validateEmailAddress)
 
 // response handler middleware
 app.use(handleResponse)

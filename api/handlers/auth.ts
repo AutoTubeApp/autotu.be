@@ -119,3 +119,8 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     next(error)
   }
 }
+
+// validate email address
+export const validateEmailAddress = (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(201).send()
+}
