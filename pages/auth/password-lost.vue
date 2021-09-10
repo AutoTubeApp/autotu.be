@@ -8,7 +8,10 @@
 
 import { Component, Vue } from 'nuxt-property-decorator'
 
-@Component
+@Component({
+  middleware: 'auth',
+  auth: 'guest'
+})
 export default class PasswordLost extends Vue {
 }
 </script>

@@ -70,7 +70,10 @@ import { Component, namespace, Vue } from 'nuxt-property-decorator'
 
 const NsSnackbarStore = namespace('snackbarStore')
 
-@Component
+@Component({
+  middleware: 'auth',
+  auth: 'guest'
+})
 export default class CreateAccount extends Vue {
   public valid: boolean = false
   public email: string = ''

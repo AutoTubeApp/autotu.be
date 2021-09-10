@@ -55,7 +55,10 @@ import { Component, namespace, Vue } from 'nuxt-property-decorator'
 
 const NsSnackbarStore = namespace('snackbarStore')
 
-@Component
+@Component({
+  middleware: 'auth',
+  auth: 'guest'
+})
 export default class Auth extends Vue {
   // store
   @NsSnackbarStore.Action
