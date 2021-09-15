@@ -5,71 +5,81 @@
       cols="12"
       md="6"
     >
-      <h2>Create an account</h2>
-      <p class="mt-4 mb-1">
-        Just enter your email address and click "NEXT" button.
-      </p>
-      <p class="mt-0">
-        You will received an email with the rest of the procedure to create your account.
-      </p>
-      <v-form
-        ref="form"
-        v-model="valid"
-        lazy-validation
-      >
-        <v-text-field
-          v-model="email"
-          type="email"
-          autocomplete="email"
-          :rules="emailRules"
-          label="Enter your e-mail"
-          required
-        />
-
-        <!--
-        <v-text-field
-          v-if="show"
-          v-model="password"
-          type="password"
-          autocomplete="current-password"
-          :rules="passwordRules"
-          label="Choose a password"
-          required
-        />
-        <v-checkbox
-          v-if="show"
-          v-model="subscribe2nl"
-          label="Get last Autotube news, subscribe to our newsletter."
-        />
-        -->
-        <v-checkbox
-          v-model="tos"
-          class="mt-0"
-          :rules="tosRules"
+      <h2 class="mb-4">
+        Create an account
+      </h2>
+      <!-- step 1 registration form -->
+      <div v-if="step===1">
+        <p class="mb-1">
+          Just enter your email address and click "Next" button.
+        </p>
+        <p class="mt-0">
+          You will received an email with the rest of the procedure to create your account.
+        </p>
+        <v-form
+          ref="form"
+          v-model="valid"
+          lazy-validation
         >
-          <template #label>
-            <div>
-              I agree to
-              <nuxt-link to="tos">
-                terms and conditions
-              </nuxt-link>
-              .
-            </div>
-          </template>
-        </v-checkbox>
+          <v-text-field
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            :rules="emailRules"
+            label="Enter your e-mail"
+            required
+          />
 
-        <v-row class="mt-3 pl-3">
-          <v-spacer />
-          <v-btn
-            :disabled="!valid"
-            color="blue darken-1"
-            class="mr-4"
-            @click="handleForm"
+          <!--
+          <v-text-field
+            v-if="show"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            :rules="passwordRules"
+            label="Choose a password"
+            required
+          />
+          <v-checkbox
+            v-if="show"
+            v-model="subscribe2nl"
+            label="Get last Autotube news, subscribe to our newsletter."
+          />
+          -->
+          <v-checkbox
+            v-model="tos"
+            class="mt-0"
+            :rules="tosRules"
           >
-            next
-          </v-btn>
-        </v-row>
-      </v-form>
+            <template #label>
+              <div>
+                I agree to
+                <nuxt-link to="tos">
+                  terms and conditions
+                </nuxt-link>
+                .
+              </div>
+            </template>
+          </v-checkbox>
+
+          <v-row class="mt-3 pl-3">
+            <v-spacer />
+            <v-btn
+              :disabled="!valid"
+              color="blue darken-1"
+              class="mr-4"
+              @click="handleForm"
+            >
+              next
+            </v-btn>
+          </v-row>
+        </v-form>
+      </div>
+      <div v-if="step===2">
+        <p>An email has been sent to {{ email }} containing instructions to activate your Autotube account.</p>
+        <p>Thanks you for joining us !</p>
+      </div>
+      <!-- step 2 thanks -->
     </v-col>
   </v-row>
 </template>
@@ -85,18 +95,19 @@ const NsSnackbarStore = namespace('snackbarStore')
   auth: 'guest'
 })
 export default class CreateAccount extends Vue {
-  public valid: boolean = false
+  private step: number = 1
+  private valid: boolean = false
 
-  public email: string = 'toorop@gmail.com'
+  private email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public tos: boolean = false
+  private tos: boolean = false
   // public subscribe2nl: boolean = false
 
-  public tosRules: ((v: boolean) => string | boolean)[] = [
+  private tosRules: ((v: boolean) => string | boolean)[] = [
     (v: boolean) => v || 'You must agree to terms and conditions'
   ]
 
@@ -120,6 +131,7 @@ export default class CreateAccount extends Vue {
       })
 
       // todo display OK
+      this.step = 2
 
       /*
       // auth request
