@@ -27,7 +27,7 @@ export class User {
     this.email = email.toLowerCase()
   }
 
-  // Get user from email todo
+  // Get user by email
   public static async GetUser (email: string): Promise<User | null> {
     const db = Db.getInstance()
 
@@ -40,6 +40,23 @@ export class User {
     }
     const dbUser = r.records[0].get('u').properties as IUserProps
     const user = new User(email)
+    user.assignPropertiesOf(dbUser)
+    return user
+  }
+
+  // get user by validationId
+  public static async GetUserByValidationId (validationId: string): Promise<User | null> {
+    const db = Db.getInstance()
+
+    const r = await db.session.run('MATCH (u:User {validationId: $validationId}) RETURN u',
+      { validationId }
+    )
+
+    if (r.records.length === 0) {
+      return null
+    }
+    const dbUser = r.records[0].get('u').properties as IUserProps
+    const user = new User(dbUser.email)
     user.assignPropertiesOf(dbUser)
     return user
   }

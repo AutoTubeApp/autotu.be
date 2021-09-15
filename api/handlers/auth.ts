@@ -55,7 +55,14 @@ export const postUser = async (req: express.Request, res: express.Response, next
 
 // second step for registration
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
-export const validateAccount = (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+export const validateAccount = async (req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const { id } = req.body
+  console.log(id)
+
+  // get user by validation ID
+  const user = await User.GetUserByValidationId(id)
+  console.log(user)
+
   res.status(201).send()
 }
 
