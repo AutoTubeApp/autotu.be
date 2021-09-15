@@ -38,7 +38,7 @@ export class SendInBlue {
   }
 
   // send templated mail
-  public async sendTemplatedMail (to: string, templateId: number, params?: object): Promise<void> {
+  public async sendTemplatedMail (to: string, templateId: number, params: object): Promise<void> {
     this._initTransactionalEmailsApi()
     const email = new SendSmtpEmail()
     email.to = [{ email: to }]

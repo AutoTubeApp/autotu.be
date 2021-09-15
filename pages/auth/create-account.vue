@@ -6,6 +6,12 @@
       md="6"
     >
       <h2>Create an account</h2>
+      <p class="mt-4 mb-1">
+        Just enter your email address and click "NEXT" button.
+      </p>
+      <p class="mt-0">
+        You will received an email with the rest of the procedure to create your account.
+      </p>
       <v-form
         ref="form"
         v-model="valid"
@@ -20,7 +26,9 @@
           required
         />
 
+        <!--
         <v-text-field
+          v-if="show"
           v-model="password"
           type="password"
           autocomplete="current-password"
@@ -29,9 +37,11 @@
           required
         />
         <v-checkbox
+          v-if="show"
           v-model="subscribe2nl"
           label="Get last Autotube news, subscribe to our newsletter."
         />
+        -->
         <v-checkbox
           v-model="tos"
           class="mt-0"
@@ -76,21 +86,15 @@ const NsSnackbarStore = namespace('snackbarStore')
 })
 export default class CreateAccount extends Vue {
   public valid: boolean = false
-  public email: string = ''
+
+  public email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  public password: string = ''
-  public passwordRules: ((v: string) => string | boolean)[] = [
-    (v: string) => !!v || 'Password is required',
-    (v: string) => (v.length > 8) || 'Password length must be of 8-15',
-    (v: string) => v.length <= 15 || 'Password length must be of 8-15'
-  ]
-
   public tos: boolean = false
-  public subscribe2nl: boolean = false
+  // public subscribe2nl: boolean = false
 
   public tosRules: ((v: boolean) => string | boolean)[] = [
     (v: boolean) => v || 'You must agree to terms and conditions'
@@ -112,11 +116,12 @@ export default class CreateAccount extends Vue {
 
     try {
       await this.$axios.post('/api/user', {
-        email: this.email.trim(),
-        password: this.password.trim(),
-        subscribe: this.subscribe2nl
+        email: this.email.trim()
       })
 
+      // todo display OK
+
+      /*
       // auth request
       // const response: void | HTTPResponse =
       await this.$auth.loginWith('local', {
@@ -125,6 +130,8 @@ export default class CreateAccount extends Vue {
           password: this.password
         }
       })
+
+       */
     } catch (e) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',

@@ -12,34 +12,31 @@ export const postUser = async (req: express.Request, res: express.Response, next
   const response = new ApiResponse()
 
   try {
-    // get email and passwd
-    const {
-      email,
-      // eslint-disable-next-line prefer-const
-      password,
-      // eslint-disable-next-line prefer-const
-      subscribe
-    } = req.body
+    const { email } = req.body
 
     let user: User
 
     try {
       // create user
-      user = await User.Create(email, password, subscribe)
+      user = await User.Create(email)
+
       // send welcome email
+      // silently (for user) drop potentially error
       try {
         await user.sendWelcomeEmail()
       } catch (e) {
         logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
       }
-      // subscribe to newsletter
-      if (subscribe) {
-        try {
-          await user.subscribeToNewsletter()
-        } catch (e) {
-          logger.error(`${req.ip}: hdl postUser - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
-        }
-      }
+
+      // todo reactivate (une fois le mail validé)
+      // // subscribe to newsletter
+      // if (subscribe) {
+      //   try {
+      //     await user.subscribeToNewsletter()
+      //   } catch (e) {
+      //     logger.error(`${req.ip}: hdl postUser - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
+      //   }
+      // }
     } catch (e) {
       if (e instanceof AttError) {
         res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
@@ -54,6 +51,12 @@ export const postUser = async (req: express.Request, res: express.Response, next
   } catch (e) {
     next(e)
   }
+}
+
+// second step for registration
+// http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
+export const validateAccount = (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(201).send()
 }
 
 // get user from JWT
@@ -77,7 +80,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
   try {
     // get db instance
     const db = Db.getInstance()
-    const r = await db.session.run('MATCH (user {email: $email}) return user', {
+    const r = await db.session.run('MATCH (u:User {email: $email}) return u', {
       email
     })
     if (r.records.length !== 1) {
@@ -87,7 +90,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     }
 
     // ok get password from DB
-    const inDbHash = r.records[0].get('user').properties.password
+    const inDbHash = r.records[0].get('u').properties.password
     const isMatch = await compare(password, inDbHash)
 
     if (!isMatch) {
@@ -118,9 +121,4 @@ export const newSession = async (req: express.Request, res: express.Response, ne
   } catch (error) {
     next(error)
   }
-}
-
-// validate email address
-export const validateEmailAddress = (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  res.status(201).send()
 }
