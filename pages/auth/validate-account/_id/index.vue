@@ -25,6 +25,7 @@
         <v-text-field
           v-model="password"
           type="password"
+          :error-messages="passwordsErrorMessage"
           autocomplete="current-password"
           :rules="passwordRules"
           label="Choose a password"
@@ -35,6 +36,7 @@
           v-model="rePassword"
           type="password"
           autocomplete="current-password"
+          :error-messages="passwordsErrorMessage"
           :rules="passwordRules"
           label="Retype password"
           required
@@ -72,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { Component, namespace, Vue } from 'nuxt-property-decorator'
+import { Component, namespace, Vue, Watch } from 'nuxt-property-decorator'
 
 const NsSnackbarStore = namespace('snackbarStore')
 
@@ -86,6 +88,9 @@ export default class ValidateAccount extends Vue {
   private formIsValid: boolean = false
   private validationIdIsValid: boolean = false
 
+  // to check passwords match
+  private passwordsErrorMessage = ''
+
   private username: string = ''
   private usernameRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Username is required',
@@ -95,17 +100,16 @@ export default class ValidateAccount extends Vue {
 
   private password: string = ''
   private rePassword: string = ''
-  public passwordRules: ((v: string) => string | boolean)[] = [
+  private passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length > 8) || 'Password length must be of 8-15',
     (v: string) => v.length <= 15 || 'Password length must be of 8-15'
+    // (_v: string) => (this.password !== this.rePassword) || 'Passwords mismatches'
   ]
 
   // hooks
   async beforeMount () {
     await this.validateId()
-
-    // this.$auth.setUser()
   }
 
   // store
@@ -115,7 +119,30 @@ export default class ValidateAccount extends Vue {
   @NsSnackbarStore.Action
   public hideSnackbar!: () => void
 
+  // watcher
+  @Watch('password')
+  passwordHasChanged () {
+    this.isPasswordMatch()
+  }
+
+  @Watch('rePassword')
+  rePasswordHasChanged () {
+    this.isPasswordMatch()
+  }
+
   // methods
+
+  // check if password match
+  private isPasswordMatch (): void {
+    this.passwordsErrorMessage = ''
+    if (this.password.length === 0 || this.rePassword.length === 0) {
+      return
+    }
+    if (this.password !== this.rePassword) {
+      this.passwordsErrorMessage = 'Passwords do not match'
+    }
+  }
+
   // check ID and get user
   private async validateId (): Promise<void> {
     try {
@@ -136,7 +163,25 @@ export default class ValidateAccount extends Vue {
   }
 
   private handleForm (): void {
+    const isValid = (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    if (!isValid) {
+      return
+    }
 
+    // update user (set password and username)
+    try {
+      this.$axios.put('/api/activate-account', {
+        id: this.$route.params.id,
+        password: this.password,
+        username: this.username
+      })
+      // todo auth user
+    } catch (e) {
+      this.showSnackbar({
+        text: e.response?.data?.message || 'Oops something went wrong',
+        color: 'error'
+      })
+    }
   }
 }
 </script>

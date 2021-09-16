@@ -1,6 +1,7 @@
 import { v4 as uuidV4 } from 'uuid'
 import validator from 'validator'
-import { hash } from 'bcrypt'
+import { compare, hash } from 'bcrypt'
+
 import Db from '../Db'
 import { AttError } from './Error'
 import { SendInBlue } from './SendInBlue'
@@ -9,22 +10,43 @@ import { SendInBlue } from './SendInBlue'
 interface IUserProps {
   email: string
   uuid?: string
+  username?: string
   password?: string
   validationId?: string
 }
 
 // Autotube User
+// todo set all props as private
 export class User {
-  public email: string
-  public uuid?: string
-  public password?: string
-  public validationId?: string
+  public _email: string
+  private _username?: string
+  public _uuid?: string
+  private _password?: string
+  public _validationId?: string
 
   constructor (email: string) {
     if (!validator.isEmail(email)) {
       throw AttError.New(`new user: bad email '${email}'`, `'${email}' is not a valid email`)
     }
-    this.email = email.toLowerCase()
+    this._email = email.toLowerCase()
+  }
+
+  public set username (username: string | undefined) {
+    this._username = username
+  }
+
+  public get username (): string | undefined {
+    return this._username
+  }
+
+  // set password from clear password
+  public async setPassword (password: string): Promise<void> {
+    this._password = await hash(password, 10)
+  }
+
+  // update validationId
+  public updateValidationUuid (): void {
+    this._validationId = uuidV4()
   }
 
   // Get user by email
@@ -64,8 +86,8 @@ export class User {
   // create a new user
   public static async Create (email: string): Promise<User> {
     const u = new User(email)
-    u.uuid = uuidV4()
-    u.validationId = uuidV4()
+    u._uuid = uuidV4()
+    u._validationId = uuidV4()
 
     // u.password = await hash(password, 10)
 
@@ -74,22 +96,21 @@ export class User {
       await db.session.run(
         'CREATE (n:User {email: $email,  uuid: $uuid, emailVerified: false, validationId: $validationId})',
         {
-          email: u.email,
-          hashedPassword: u.password,
-          uuid: u.uuid,
-          validationId: u.validationId
+          email: u._email,
+          uuid: u._uuid,
+          validationId: u._validationId
         }
       )
     } catch (e) {
       if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
         // get user to check if he has completed his registration
         // if not act if it's a new user
-        const r = await this.GetUser(u.email) as User
-        if (r.password !== undefined) {
+        const r = await this.GetUser(u._email) as User
+        if (r._password !== undefined) {
           throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
         }
-        u.uuid = r.uuid
-        u.validationId = r.validationId
+        u._uuid = r._uuid
+        u._validationId = r._validationId
       } else {
         throw e
       }
@@ -100,24 +121,37 @@ export class User {
   // assign properties from object fetch from DB to instance
   // Warning !!! no type check is made, nor validation be sure of your properties
   private assignPropertiesOf (properties: IUserProps): void {
-    this.email = properties.email
-    this.uuid = properties.uuid
-    this.password = properties.password
-    this.validationId = properties.validationId
+    this._email = properties.email
+    this._username = properties.username
+    this._uuid = properties.uuid
+    this._password = properties.password
+    this._validationId = properties.validationId
   }
 
-  // save instance in DB
-  private save (): void {
+  // save User instance in DB
+  public async save (): Promise<void> {
+    const db = Db.getInstance()
+
+    const r = await db.session.run(
+      'MATCH (u:User {uuid: $uuid}) SET u += { email: $email, username: $username, password: $password, validationId: $validationId}',
+      {
+        uuid: this._uuid,
+        email: this._email,
+        username: this._username,
+        password: this._password,
+        validationId: this._validationId
+      }
+    )
   }
 
   // send welcome email
   public async sendWelcomeEmail (): Promise<void> {
     const sib = new SendInBlue()
-    await sib.sendTemplatedMail(this.email, 1, { validationId: this.validationId })
+    await sib.sendTemplatedMail(this._email, 1, { validationId: this._validationId })
   }
 
   public async subscribeToNewsletter (): Promise<void> {
     const sib = new SendInBlue()
-    await sib.subscribeToNewsletter(this.email, 2)
+    await sib.subscribeToNewsletter(this._email, 2)
   }
 }

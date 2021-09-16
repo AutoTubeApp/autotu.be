@@ -21,7 +21,7 @@ app.use(
     secret: process.env.ATT_JWT_SECRET!,
     algorithms: ['sha1', 'RS256', 'HS256']
   }).unless({
-    path: ['/api/session', '/api/validate-account',
+    path: ['/api/session', '/api/validate-account', '/api/activate-account',
       {
         url: '/api/user',
         method: 'POST'
@@ -38,8 +38,11 @@ app.get('/user', hdlAuth.getUser)
 // authentification
 app.post('/session', hdlAuth.newSession)
 
-// email validation
+// email validation => activate (set username && password)
 app.put('/validate-account', hdlAuth.validateAccount)
+
+// activate account (user set username && password
+app.put('/activate-account', hdlAuth.activateAccount)
 
 // response handler middleware
 app.use(handleResponse)

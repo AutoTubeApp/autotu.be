@@ -25,7 +25,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       try {
         await user.sendWelcomeEmail()
       } catch (e) {
-        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
+        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user._uuid}: ${e.message}`)
       }
 
       // todo reactivate (une fois le mail validé)
@@ -46,7 +46,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       }
       return
     }
-    logger.info(`user.create: new user ${user.email} - ${user.uuid}`)
+    logger.info(`user.create: new user ${user._email} - ${user._uuid}`)
     res.status(201).send()
   } catch (e) {
     next(e)
@@ -54,6 +54,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
 }
 
 // second step for registration
+// just validate validationID (is set for one user
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
 export const validateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
@@ -64,14 +65,47 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   const user = await User.GetUserByValidationId(id)
 
   // no user (user === null)
-  if (!(user instanceof User)) {
+  if (user === null) {
     res.locals.response = response.setResponse(404, '', 1,
       `validateAccount failed: bad validation id: ${id}`)
     next()
     return
   }
+  res.status(200).send()
+}
 
-  res.status(201).send()
+// activateAccount
+// user send username && password
+export const activateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const response = new ApiResponse()
+
+  const {
+    id,
+    username,
+    password
+  } = req.body
+
+  // check ID (normally useless but...)
+  const user = await User.GetUserByValidationId(id)
+  // no user (user === null)
+  if (user === null) {
+    res.locals.response = response.setResponse(400, 'Don\'t be evil !', 1,
+      `activateAccount failed: bad validation id: ${id}`)
+    next()
+    return
+  }
+
+  // set user password, and username
+  user.username = username
+  await user.setPassword(password)
+  user.updateValidationUuid()
+
+  // save user in DB
+  await user.save()
+
+  // todo subscribe to newsletter
+
+  res.status(200).send()
 }
 
 // get user from JWT
@@ -80,6 +114,7 @@ export const getUser = (req: express.Request, res: express.Response) => {
 }
 
 // new session (sign in)
+// todo refaire via la class User
 export const newSession = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
 
