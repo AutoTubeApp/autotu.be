@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col
-      v-if="validationIdIsValid"
+      v-if="step===1 && validationIdIsValid"
       class="mx-auto"
       cols="12"
       md="6"
@@ -53,8 +53,20 @@
         </v-row>
       </v-form>
     </v-col>
-    <v-col v-if="step>0 && !validationIdIsValid">
-      <p>INVALID !</p>
+    <!-- validationId is invalid -->
+    <v-col
+      v-if="step=== 1 && !validationIdIsValid"
+      class="mx-auto"
+      cols="12"
+      md="6"
+    >
+      <v-alert
+        dense
+        border="left"
+        type="error"
+      >
+        This link is not valid
+      </v-alert>
     </v-col>
   </v-row>
 </template>
@@ -110,13 +122,16 @@ export default class ValidateAccount extends Vue {
       this.validationIdIsValid = await this.$axios.put('/api/validate-account', {
         id: this.$route.params.id
       })
-      // this.validationIdIsValid = false
-      // if is valid form wil be displayed
     } catch (e) {
-      this.showSnackbar({
-        text: e.response?.data?.message || 'Oops something went wrong',
-        color: 'error'
-      })
+      // not found ?
+      if (e.response?.status !== 404) {
+        this.showSnackbar({
+          text: e.response?.data?.message || 'Oops something went wrong',
+          color: 'error'
+        })
+      }
+    } finally {
+      this.step = 1
     }
   }
 

@@ -30,5 +30,12 @@ export const handleResponse = (req: express.Request, res: express.Response, next
     }
   }
   // send response to client
-  res.status(r.httpStatus).json(r.getResponse())
+  const responseBody = r.getResponse()
+  // empty response ?
+  if (responseBody) {
+    res.status(r.httpStatus).json(responseBody)
+  } else {
+    res.status(r.httpStatus).send('')
+  }
+  // next()
 }

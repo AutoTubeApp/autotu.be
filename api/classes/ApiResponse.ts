@@ -1,4 +1,4 @@
-import { GetResponseResponse, LogLevel } from '../types'
+import { GetResponseBody, LogLevel } from '../types'
 
 export class ApiResponse {
   public httpStatus: number
@@ -13,8 +13,8 @@ export class ApiResponse {
   }
 
   // return response formatted for client
-  public getResponse (): GetResponseResponse {
-    const response: GetResponseResponse = {}
+  public getResponse (): GetResponseBody | null {
+    const response: GetResponseBody = {}
 
     if (this.userMessage) {
       response.message = this.userMessage
@@ -22,6 +22,10 @@ export class ApiResponse {
 
     if (this.payload) {
       response.payload = this.payload
+    }
+
+    if (Object.keys(response).length === 0) {
+      return null
     }
 
     return response

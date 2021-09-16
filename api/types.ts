@@ -10,7 +10,8 @@ export enum LogLevel {
   'error'
 }
 
-export type GetResponseResponse = {
+// Json object returned to client
+export type GetResponseBody = {
   message?: string
   payload?: object
 }
