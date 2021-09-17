@@ -44,7 +44,7 @@ app.put('/validate-account', hdlAuth.validateAccount)
 // activate account (user set username && password
 app.put('/activate-account', hdlAuth.activateAccount)
 
-// response handler middleware
+// response handler middleware (if response)
 app.use(handleResponse)
 
 // ultimate error handler middleware

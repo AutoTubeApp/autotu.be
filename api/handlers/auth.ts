@@ -27,16 +27,6 @@ export const postUser = async (req: express.Request, res: express.Response, next
       } catch (e) {
         logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user._uuid}: ${e.message}`)
       }
-
-      // todo reactivate (une fois le mail validé)
-      // // subscribe to newsletter
-      // if (subscribe) {
-      //   try {
-      //     await user.subscribeToNewsletter()
-      //   } catch (e) {
-      //     logger.error(`${req.ip}: hdl postUser - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
-      //   }
-      // }
     } catch (e) {
       if (e instanceof AttError) {
         res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
@@ -46,7 +36,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       }
       return
     }
-    logger.info(`user.create: new user ${user._email} - ${user._uuid}`)
+    logger.info(`user.create: new user  ${user._uuid} (${user._email})`)
     res.status(201).send()
   } catch (e) {
     next(e)
@@ -71,41 +61,63 @@ export const validateAccount = async (req: express.Request, res: express.Respons
     next()
     return
   }
-  res.status(200).send()
+  res.status(201).send()
 }
 
 // activateAccount
 // user send username && password
+//
+//
 export const activateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
-
   const {
     id,
     username,
     password
   } = req.body
 
-  // check ID (normally useless but...)
-  const user = await User.GetUserByValidationId(id)
-  // no user (user === null)
-  if (user === null) {
-    res.locals.response = response.setResponse(400, 'Don\'t be evil !', 1,
-      `activateAccount failed: bad validation id: ${id}`)
+  try {
+    // check ID (normally useless but...)
+    const user = await User.GetUserByValidationId(id)
+    // no user (user === null)
+    if (user === null) {
+      res.locals.response = response.setResponse(400, 'Don\'t be evil !', 1,
+        `activateAccount failed: bad validation id: ${id}`)
+      next()
+      return
+    }
+
+    // set user password, and username
+    // username must be
+
+    user.username = username
+    await user.setPassword(password)
+    // todo uncomment
+    // user.updateValidationUuid()
+
+    // save user in DB
+    await user.save()
+
+    // subscribe to newsletter
+    //  just log error
+    try {
+      await user.subscribeToNewsletter()
+    } catch (e) {
+      // just log error
+      logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user._uuid}: ${e.message}`)
+    }
+
+    // OK !
+    res.locals.response = response.setResponse(201, '', 1, `activateAccount: ${user._uuid} (${user._email}) activated`, { email: user._email })
     next()
-    return
+  } catch (e) {
+    if (e instanceof AttError) {
+      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
+      next()
+    } else {
+      next(e)
+    }
   }
-
-  // set user password, and username
-  user.username = username
-  await user.setPassword(password)
-  user.updateValidationUuid()
-
-  // save user in DB
-  await user.save()
-
-  // todo subscribe to newsletter
-
-  res.status(200).send()
 }
 
 // get user from JWT
@@ -151,7 +163,6 @@ export const newSession = async (req: express.Request, res: express.Response, ne
 
     // create access token
     const expiresIn: string = '24h'
-    // const refreshToken: string = 'r' + Math.floor(Math.random() * (1000000000000000 - 1 + 1)) + 1
     const accessToken = jsonwebtoken.sign(
       {
         uuid: '72bb9529-3cf5-4127-98ab-8426d59c5ac3',

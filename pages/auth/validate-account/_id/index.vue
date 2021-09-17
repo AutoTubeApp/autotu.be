@@ -162,7 +162,7 @@ export default class ValidateAccount extends Vue {
     }
   }
 
-  private handleForm (): void {
+  private async handleForm (): Promise<void> {
     const isValid = (this.$refs.form as Vue & { validate: () => boolean }).validate()
     if (!isValid) {
       return
@@ -170,12 +170,22 @@ export default class ValidateAccount extends Vue {
 
     // update user (set password and username)
     try {
-      this.$axios.put('/api/activate-account', {
+      const response = await this.$axios.put('/api/activate-account', {
         id: this.$route.params.id,
         password: this.password,
         username: this.username
       })
-      // todo auth user
+
+      const email = response.data.payload.email
+
+      // auth request
+      // const response: void | HTTPResponse =
+      await this.$auth.loginWith('local', {
+        data: {
+          email,
+          password: this.password
+        }
+      })
     } catch (e) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',

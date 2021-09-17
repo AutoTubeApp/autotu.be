@@ -16,7 +16,6 @@ interface IUserProps {
 }
 
 // Autotube User
-// todo set all props as private
 export class User {
   public _email: string
   private _username?: string
@@ -32,7 +31,30 @@ export class User {
   }
 
   public set username (username: string | undefined) {
-    this._username = username
+    // validation
+    if (!username) {
+      throw AttError.New('username is undefined', 'username is required.')
+    }
+
+    // - no space
+    if (/\s/.test(username)) {
+      throw AttError.New('spaces are not allowed in username', 'spaces are not allowed in username.')
+    }
+
+    // - > 3 && < 21
+    if (username.length < 4 || username.length > 21) {
+      throw AttError.New(`bad length for username, should be between 4 and 21, ${username.length} given`, 'bad length for username, must be between 4 and 21 chars.')
+    }
+    // alphanumeric
+    if (!validator.isAlphanumeric(username)) {
+      throw AttError.New('must be alphanumeric', 'username must be alphanumeric.')
+    }
+
+    // todo check if username exists
+    username = username.toLowerCase()
+
+    // ok
+    this._username = username.toLowerCase()
   }
 
   public get username (): string | undefined {
@@ -41,6 +63,20 @@ export class User {
 
   // set password from clear password
   public async setPassword (password: string): Promise<void> {
+    // validation
+    if (!password) {
+      throw AttError.New('password is undefined', 'password is required.')
+    }
+    // - no space
+    if (/\s/.test(password)) {
+      throw AttError.New('spaces are not allowed in password', 'spaces are not allowed in password.')
+    }
+
+    // - > 3 && < 21
+    if (password.length < 8 || password.length > 15) {
+      throw AttError.New(`bad length for password, should be between 8 and 15, ${password.length} given`, 'bad length for username, must be between 8 and 15 chars.')
+    }
+
     this._password = await hash(password, 10)
   }
 
@@ -73,7 +109,6 @@ export class User {
     const r = await db.session.run('MATCH (u:User {validationId: $validationId}) RETURN u',
       { validationId }
     )
-
     if (r.records.length === 0) {
       return null
     }
@@ -132,7 +167,7 @@ export class User {
   public async save (): Promise<void> {
     const db = Db.getInstance()
 
-    const r = await db.session.run(
+    await db.session.run(
       'MATCH (u:User {uuid: $uuid}) SET u += { email: $email, username: $username, password: $password, validationId: $validationId}',
       {
         uuid: this._uuid,

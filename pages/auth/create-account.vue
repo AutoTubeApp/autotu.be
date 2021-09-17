@@ -98,6 +98,7 @@ export default class CreateAccount extends Vue {
   private step: number = 1
   private valid: boolean = false
 
+  // todo remove default value
   private email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
@@ -129,29 +130,14 @@ export default class CreateAccount extends Vue {
       await this.$axios.post('/api/user', {
         email: this.email.trim()
       })
-
-      // todo display OK
+      // change display
       this.step = 2
-
-      /*
-      // auth request
-      // const response: void | HTTPResponse =
-      await this.$auth.loginWith('local', {
-        data: {
-          email: this.email,
-          password: this.password
-        }
-      })
-
-       */
     } catch (e) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
       })
     }
-
-    // get user and redirect
   }
 }
 </script>
