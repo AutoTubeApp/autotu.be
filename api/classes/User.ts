@@ -47,18 +47,23 @@ export class User {
     }
     // alphanumeric
     if (!validator.isAlphanumeric(username)) {
-      throw AttError.New('must be alphanumeric', 'username must be alphanumeric.')
+      throw AttError.New('username must be alphanumeric', 'username must be alphanumeric.')
     }
 
-    // todo check if username exists
     username = username.toLowerCase()
-
     // ok
     this._username = username.toLowerCase()
   }
 
   public get username (): string | undefined {
     return this._username
+  }
+
+  // check if username exists
+  public static async UsernameExists (username: string): Promise<boolean> {
+    username = username.toLowerCase()
+    const u = await User.GetUserByUsername(username)
+    return u !== null
   }
 
   // set password from clear password
@@ -108,6 +113,22 @@ export class User {
 
     const r = await db.session.run('MATCH (u:User {validationId: $validationId}) RETURN u',
       { validationId }
+    )
+    if (r.records.length === 0) {
+      return null
+    }
+    const dbUser = r.records[0].get('u').properties as IUserProps
+    const user = new User(dbUser.email)
+    user.assignPropertiesOf(dbUser)
+    return user
+  }
+
+  // get user by validationId
+  public static async GetUserByUsername (username: string): Promise<User | null> {
+    const db = Db.getInstance()
+
+    const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
+      { username }
     )
     if (r.records.length === 0) {
       return null

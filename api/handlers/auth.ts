@@ -88,12 +88,20 @@ export const activateAccount = async (req: express.Request, res: express.Respons
     }
 
     // set user password, and username
-    // username must be
+    // check if username exists
+    if (await User.UsernameExists(username)) {
+      res.locals.response = response.setResponse(400,
+        `username ${username} already exists`,
+        1,
+        `username ${username} already exists`
+      )
+      next()
+      return
+    }
 
     user.username = username
     await user.setPassword(password)
-    // todo uncomment
-    // user.updateValidationUuid()
+    user.updateValidationUuid()
 
     // save user in DB
     await user.save()

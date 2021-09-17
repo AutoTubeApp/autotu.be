@@ -98,8 +98,7 @@ export default class CreateAccount extends Vue {
   private step: number = 1
   private valid: boolean = false
 
-  // todo remove default value
-  private email: string = 'toorop@gmail.com'
+  private email: string = ''
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
