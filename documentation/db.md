@@ -33,6 +33,17 @@ MATCH (n) DETACH DELETE n
 
 ```shell
 CREATE CONSTRAINT uniq_email IF NOT EXISTS
-ON (n:User)
-ASSERT n.email IS UNIQUE
+ON (u:User)
+ASSERT u.email IS UNIQUE
 ```
+
+## Schema
+
+- Unique constraint: User.email, User.username
+
+```shell
+CREATE CONSTRAINT uniq_username IF NOT EXISTS
+ON (u:User)
+ASSERT u.username IS UNIQUE
+```
+
