@@ -13,7 +13,6 @@ export const postUser = async (req: express.Request, res: express.Response, next
 
   try {
     const { email } = req.body
-
     let user: User
 
     try {
@@ -66,8 +65,6 @@ export const validateAccount = async (req: express.Request, res: express.Respons
 
 // activateAccount
 // user send username && password
-//
-//
 export const activateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
   const {
@@ -125,6 +122,29 @@ export const activateAccount = async (req: express.Request, res: express.Respons
     } else {
       next(e)
     }
+  }
+}
+
+// reset password
+// send an email to user (if exits) to reset his password
+export const resetPassword = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const response = new ApiResponse()
+  try {
+    const { email } = req.body
+    const user = await User.GetUser(email)
+    if (user === null) {
+      res.locals.response = response.setResponse(404, 'No such user', 1,
+        `resetPassword: no such user ${email}`)
+      next()
+      return
+    }
+    // new validationId
+    user.updateValidationUuid()
+    await user.save()
+    await user.sendResetPasswordEmail()
+    res.status(200).send()
+  } catch (e) {
+    next(e)
   }
 }
 

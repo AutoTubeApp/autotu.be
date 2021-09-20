@@ -12,11 +12,11 @@
       <v-form
         ref="form"
         v-model="formIsValid"
-        lazy-validation
       >
         <v-text-field
           v-model="username"
           type="text"
+          autocomplete="true"
           :rules="usernameRules"
           label="Username"
           required

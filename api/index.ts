@@ -21,11 +21,10 @@ app.use(
     secret: process.env.ATT_JWT_SECRET!,
     algorithms: ['sha1', 'RS256', 'HS256']
   }).unless({
-    path: ['/api/session', '/api/validate-account', '/api/activate-account',
-      {
-        url: '/api/user',
-        method: 'POST'
-      }]
+    path: ['/api/session', '/api/validate-account', '/api/activate-account', '/api/reset-password', '/api/update-password', {
+      url: '/api/user',
+      method: 'POST'
+    }]
   })
 )
 
@@ -43,6 +42,12 @@ app.put('/validate-account', hdlAuth.validateAccount)
 
 // activate account (user set username && password
 app.put('/activate-account', hdlAuth.activateAccount)
+
+// reset-password-1 send an email
+app.post('/reset-password', hdlAuth.resetPassword)
+
+// update password
+// app.put('/update-password', update-password)
 
 // response handler middleware (if response)
 app.use(handleResponse)
