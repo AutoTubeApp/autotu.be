@@ -89,7 +89,3 @@ export default class PasswordLost extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

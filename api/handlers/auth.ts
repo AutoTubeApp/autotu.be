@@ -47,7 +47,6 @@ export const postUser = async (req: express.Request, res: express.Response, next
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
 export const validateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
-
   const { id } = req.body
 
   // get user by validation ID
@@ -56,7 +55,7 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   // no user (user === null)
   if (user === null) {
     res.locals.response = response.setResponse(404, '', 1,
-      `validateAccount failed: bad validation id: ${id}`)
+      `validateId failed: bad validation id: ${id}`)
     next()
     return
   }
@@ -145,6 +144,38 @@ export const resetPassword = async (req: express.Request, res: express.Response,
     res.status(200).send()
   } catch (e) {
     next(e)
+  }
+}
+
+// update password by user Validation ID
+export const updatePasswordVid = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const response = new ApiResponse()
+  const {
+    id,
+    password
+  } = req.body
+
+  try {
+    // Get user
+    const user = await User.GetUserByValidationId(id)
+    if (user === null) {
+      res.locals.response = response.setResponse(404, 'No such user', 1,
+        `updatePasswordVid: no such user with validation id ${id}`)
+      next()
+      return
+    }
+    await user.setPassword(password)
+    await user.updateValidationUuid()
+    await user.save()
+    res.locals.response = response.setResponse(201, '', 1, `updatePasswordVid: ${user._uuid} (${user._email}) has changed their password`)
+    next()
+  } catch (e) {
+    if (e instanceof AttError) {
+      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
+      next()
+    } else {
+      next(e)
+    }
   }
 }
 
