@@ -1,6 +1,6 @@
 import { v4 as uuidV4 } from 'uuid'
 import validator from 'validator'
-import { compare, hash } from 'bcrypt'
+import { hash } from 'bcrypt'
 
 import Db from '../Db'
 import { AttError } from './Error'
@@ -17,17 +17,37 @@ interface IUserProps {
 
 // Autotube User
 export class User {
-  public _email: string
+  private _email: string
+  private _uuid?: string
   private _username?: string
-  public _uuid?: string
   private _password?: string
-  public _validationId?: string
+  private _validationId?: string
 
   constructor (email: string) {
     if (!validator.isEmail(email)) {
       throw AttError.New(`new user: bad email '${email}'`, `'${email}' is not a valid email`)
     }
     this._email = email.toLowerCase()
+  }
+
+  public get email (): string {
+    return this._email
+  }
+
+  public set email (email: string) {
+    // validate email
+    if (!validator.isEmail(email)) {
+      throw AttError.New(`set email: invalid email '${email}'`, `'${email}' is not a valid email`)
+    }
+    this._email = email
+  }
+
+  public get uuid (): string | undefined {
+    return this._uuid
+  }
+
+  public set uuid (uuid: string | undefined) {
+    this._uuid = uuid
   }
 
   public set username (username: string | undefined) {
@@ -59,13 +79,6 @@ export class User {
     return this._username
   }
 
-  // check if username exists
-  public static async UsernameExists (username: string): Promise<boolean> {
-    username = username.toLowerCase()
-    const u = await User.GetUserByUsername(username)
-    return u !== null
-  }
-
   // set password from clear password
   public async setPassword (password: string): Promise<void> {
     // validation
@@ -85,8 +98,27 @@ export class User {
     this._password = await hash(password, 10)
   }
 
+  public get password (): string | undefined {
+    return this._password
+  }
+
+  public get validationId (): string | undefined {
+    return this._validationId
+  }
+
+  public set validationId (validationId: string | undefined) {
+    this._validationId = validationId
+  }
+
+  // check if username exists
+  public static async UsernameExists (username: string): Promise<boolean> {
+    username = username.toLowerCase()
+    const u = await User.GetUserByUsername(username)
+    return u !== null
+  }
+
   // update validationId
-  public updateValidationUuid (): void {
+  public updateValidationId (): void {
     this._validationId = uuidV4()
   }
 

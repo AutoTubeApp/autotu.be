@@ -3,7 +3,6 @@ import jsonwebtoken from 'jsonwebtoken'
 import { compare } from 'bcrypt'
 import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
-import Db from '../Db'
 import { User } from '../classes/User'
 import { AttError } from '../classes/Error'
 
@@ -24,7 +23,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       try {
         await user.sendWelcomeEmail()
       } catch (e) {
-        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user._uuid}: ${e.message}`)
+        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
       }
     } catch (e) {
       if (e instanceof AttError) {
@@ -35,7 +34,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       }
       return
     }
-    logger.info(`user.create: new user  ${user._uuid} (${user._email})`)
+    logger.info(`user.create: new user  ${user.uuid} (${user.email})`)
     res.status(201).send()
   } catch (e) {
     next(e)
@@ -97,7 +96,7 @@ export const activateAccount = async (req: express.Request, res: express.Respons
 
     user.username = username
     await user.setPassword(password)
-    user.updateValidationUuid()
+    user.updateValidationId()
 
     // save user in DB
     await user.save()
@@ -108,11 +107,11 @@ export const activateAccount = async (req: express.Request, res: express.Respons
       await user.subscribeToNewsletter()
     } catch (e) {
       // just log error
-      logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user._uuid}: ${e.message}`)
+      logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
     }
 
     // OK !
-    res.locals.response = response.setResponse(201, '', 1, `activateAccount: ${user._uuid} (${user._email}) activated`, { email: user._email })
+    res.locals.response = response.setResponse(201, '', 1, `activateAccount: ${user.uuid} (${user.email}) activated`, { email: user.email })
     next()
   } catch (e) {
     if (e instanceof AttError) {
@@ -138,7 +137,7 @@ export const resetPassword = async (req: express.Request, res: express.Response,
       return
     }
     // new validationId
-    user.updateValidationUuid()
+    user.updateValidationId()
     await user.save()
     await user.sendResetPasswordEmail()
     res.status(200).send()
@@ -165,9 +164,9 @@ export const updatePasswordVid = async (req: express.Request, res: express.Respo
       return
     }
     await user.setPassword(password)
-    await user.updateValidationUuid()
+    await user.updateValidationId()
     await user.save()
-    res.locals.response = response.setResponse(201, '', 1, `updatePasswordVid: ${user._uuid} (${user._email}) has changed their password`)
+    res.locals.response = response.setResponse(201, '', 1, `updatePasswordVid: ${user.uuid} (${user.email}) has changed their password`)
     next()
   } catch (e) {
     if (e instanceof AttError) {
@@ -180,40 +179,33 @@ export const updatePasswordVid = async (req: express.Request, res: express.Respo
 }
 
 // get user from JWT
+// todo rename
 export const getUser = (req: express.Request, res: express.Response) => {
   res.json({ user: req.user })
 }
 
 // new session (sign in)
-// todo refaire via la class User
 export const newSession = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
 
-  const {
-    email,
-    password
-  } = req.body
-
-  // todo check email and password
-
-  // todo email to lower case
-
+  let { email } = req.body
+  email = email.toLowerCase()
+  const { password } = req.body
   try {
-    // get db instance
-    const db = Db.getInstance()
-    const r = await db.session.run('MATCH (u:User {email: $email}) return u', {
-      email
-    })
-    if (r.records.length !== 1) {
-      res.locals.response = response.setResponse(401, 'authentification failed', 1, `auth failed for ${email} - no such user`)
+    const user = await User.GetUser(email)
+    if (user === null) {
+      res.locals.response = response.setResponse(404, 'Authentification failed', 1, `auth failed for ${email} - no such user`)
       next()
       return
     }
 
-    // ok get password from DB
-    const inDbHash = r.records[0].get('u').properties.password
-    const isMatch = await compare(password, inDbHash)
-
+    // if no password (registration not complete)
+    if (user.password === undefined) {
+      res.locals.response = response.setResponse(401, 'Authentification failed', 1, `auth failed for ${email} - no password, registration not completed `)
+      next()
+      return
+    }
+    const isMatch = await compare(password, user.password)
     if (!isMatch) {
       res.locals.response = response.setResponse(401, 'authentification failed', 1, `auth failed for ${email} - bad password`)
       next()
@@ -224,21 +216,26 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     const expiresIn: string = '24h'
     const accessToken = jsonwebtoken.sign(
       {
-        uuid: '72bb9529-3cf5-4127-98ab-8426d59c5ac3',
-        username: 'Toorop',
-        email,
-        avatar: '/dev/avatar.jpg'
+        uuid: user.uuid,
+        username: user.username,
+        email
+        // avatar: '/dev/avatar.jpg'
       },
       process.env.ATT_JWT_SECRET!,
       {
         expiresIn
       }
     )
-    logger.info(`${req.ip}: ${email} sign in `)
-    res.json({
+    res.locals.response = response.setResponse(200, '', 1, `${email} sign in`, {
       token: accessToken
     })
-  } catch (error) {
-    next(error)
+    next()
+  } catch (e) {
+    if (e instanceof AttError) {
+      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
+      next()
+    } else {
+      next(e)
+    }
   }
 }

@@ -60,14 +60,18 @@
         <template #activator="{ on, attrs }">
           <v-avatar
             size="34"
-            class="ml-5"
+            class="ml-3"
             v-bind="attrs"
             v-on="on"
           >
             <img
+              v-if="$auth.user.avatar"
               :alt="$auth.user.username"
               :src="$auth.user.avatar"
             >
+            <v-icon v-else dark>
+              mdi-account-circle
+            </v-icon>
           </v-avatar>
         </template>
         <v-list>
