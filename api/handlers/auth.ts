@@ -178,8 +178,7 @@ export const updatePasswordVid = async (req: express.Request, res: express.Respo
   }
 }
 
-// get user from JWT
-// todo rename
+// get user (currently from JWT)
 export const getUser = (req: express.Request, res: express.Response) => {
   res.json({ user: req.user })
 }
