@@ -25,7 +25,7 @@
     </v-navigation-drawer>
     <v-app-bar
       clipped-left
-      fixed
+      clipped
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
@@ -85,6 +85,16 @@
               <v-list-item-title>Logout</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <nuxtLink to="/account">
+            <v-list-item nuxt>
+              <v-list-item-icon>
+                <v-icon>mdi-exit-to-app</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Account</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </nuxtLink>
         </v-list>
       </v-menu>
       <v-btn
