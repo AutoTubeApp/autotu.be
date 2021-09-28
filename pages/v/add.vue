@@ -203,6 +203,7 @@ export default class AddVideo extends Vue {
 
       // this.step = 2
     } catch (e) {
+      console.log(e.response)
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'

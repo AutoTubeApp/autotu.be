@@ -54,7 +54,7 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   // no user (user === null)
   if (user === null) {
     res.locals.response = response.setResponse(404, '', 1,
-      `validateId failed: bad validation id: ${id}`)
+      `validateAccount failed: bad validation id: ${id}`)
     next()
     return
   }
