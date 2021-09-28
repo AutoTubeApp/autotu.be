@@ -2,6 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import jwt from 'express-jwt'
 import * as hdlAuth from './handlers/auth'
+import * as hdlVideo from './handlers/video'
 import './config'
 import logger from './logger'
 import { handleResponse } from './middlewares/handleResponse'
@@ -48,6 +49,10 @@ app.post('/reset-password', hdlAuth.resetPassword)
 
 // change password
 app.put('/update-password-vid', hdlAuth.updatePasswordVid)
+
+//
+// video
+app.post('/v/load-manifest', hdlVideo.getVideoMetaFromManifest)
 
 // update password
 // app.put('/update-password', update-password)

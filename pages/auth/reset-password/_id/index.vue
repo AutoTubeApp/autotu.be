@@ -154,7 +154,6 @@ export default class resetPassword extends Vue {
       return
     }
 
-    // azertyazerty
     // update user password
     try {
       await this.$axios.put('/api/update-password-vid', {

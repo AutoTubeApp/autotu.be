@@ -10,7 +10,7 @@
       </h1>
 
       <!--Step 1: enter root URL-->
-      <v-container fluid>
+      <v-container v-if="step===0" fluid>
         <p>
           Lorem ipsum dolor sit amet. Eos voluptas sapiente <strong>Et porro ut voluptate deleniti vel iusto
             odit</strong> At maxime praesentium ut laudantium voluptatem! Vel rerum tenetur a nulla modi aut veritatis
@@ -19,22 +19,32 @@
             tempora</em>.
         </p>
         <br>
-        <v-text-field
-          v-model="manifest"
-          filled
-          class="pt-0"
-          label="Manifest URL"
-        />
-        <v-spacer />
-        <v-col class="text-right mt-0 pt-0">
-          <v-btn color="blue darken-1">
-            add video
-          </v-btn>
-        </v-col>
+        <v-form
+          ref="form"
+          v-model="formIsValid"
+        >
+          <v-text-field
+            v-model="manifest"
+            filled
+            class="pt-0"
+            label="Manifest URL"
+            :rules="manifestRules"
+          />
+          <v-spacer />
+          <v-col class="text-right mt-0 pt-0">
+            <v-btn
+              color="blue darken-1"
+              :disabled="!formIsValid"
+              @click="loadManifest"
+            >
+              add video
+            </v-btn>
+          </v-col>
+        </v-form>
       </v-container>
 
       <!--Step 2: edit info-->
-      <v-container fluid>
+      <v-container v-if="step===2" fluid>
         <!--title-->
         <v-form>
           <v-text-field
@@ -136,14 +146,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, namespace, Vue } from 'nuxt-property-decorator'
+import validator from 'validator'
+
+const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth'
 })
 export default class AddVideo extends Vue {
+  step: number = 0
+
   // manifest
   manifest: string = ''
+  private manifestRules: ((v: string) => string | boolean)[] = [
+    (v: string) => !!v || 'Manifest is required',
+    (v: string) => validator.isURL(v) || 'URL is not valid',
+    (v: string) => v.split('.')?.pop()?.toLowerCase() === 'mpd' || 'dash manifest must have .mpd extension'
+  ]
 
   // form step 2
   formIsValid: boolean = false
@@ -161,7 +181,35 @@ export default class AddVideo extends Vue {
 
   tags: string = ''
 
+  // store
+  @NsSnackbarStore.Action
+  public showSnackbar!: (payload: { text: string, color?: string }) => void
+
+  @NsSnackbarStore.Action
+  public hideSnackbar!: () => void
+
   // methods
+
+  // load manifest and return meta
+  // https://v.autotube.app/DC6FirstLanding/dash.mpd
+  private async loadManifest (): Promise<void> {
+    // validate URL
+
+    try {
+      const r = await this.$axios.post('/api/v/load-manifest', {
+        manifest: this.manifest
+      })
+      console.log(r)
+
+      // this.step = 2
+    } catch (e) {
+      this.showSnackbar({
+        text: e.response?.data?.message || 'Oops something went wrong',
+        color: 'error'
+      })
+    }
+  }
+
   // add playlist to available list
   // todo check unique
   // todo check max playlists
@@ -178,7 +226,7 @@ export default class AddVideo extends Vue {
   // todo check unique
   // todo check max channel
   private addChannel (): void {
-    if (this.playlistToAdd.length !== 0) {
+    if (this.channelToAdd.length !== 0) {
       this.channelToAdd = this.channelToAdd.charAt(0).toUpperCase() + this.channelToAdd.slice(1)
       this.availableChannels.push(this.channelToAdd)
       this.channels.push(this.channelToAdd)
