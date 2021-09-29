@@ -4,7 +4,7 @@
 
 import express from 'express'
 import validator from 'validator'
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 
 import { ApiResponse } from '../classes/ApiResponse'
 
@@ -36,9 +36,8 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   }
 
   // load mpd file
-  let r: AxiosResponse
   try {
-    r = await axios.get(manifest)
+    await axios.get(manifest)
   } catch (e) {
     // 404 not found
     if (e.response.status === 404) {
@@ -54,7 +53,17 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
 
   // OK manifest exists
   // get root path
-  console.log(r)
-
-  res.status(200).send()
+  const remoteRootPath: string = manifest.split('/').slice(0, -1).join('/')
+  // try to fetch meta.json and return meta to client
+  // on error return {}
+  try {
+    const r = await axios.get(`${remoteRootPath}/meta.json`)
+    res.status(200).json(r.data)
+  } catch (e) {
+    if (e.response?.status === 404) {
+      res.status(200).json({})
+    } else {
+      next(e)
+    }
+  }
 }

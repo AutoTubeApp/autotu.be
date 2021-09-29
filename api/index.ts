@@ -52,7 +52,7 @@ app.put('/update-password-vid', hdlAuth.updatePasswordVid)
 
 //
 // video
-app.post('/v/load-manifest', hdlVideo.getVideoMetaFromManifest)
+app.post('/v/get-meta-from-manifest', hdlVideo.getVideoMetaFromManifest)
 
 // update password
 // app.put('/update-password', update-password)

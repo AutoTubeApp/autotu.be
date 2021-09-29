@@ -10,7 +10,7 @@
       </h1>
 
       <!--Step 1: enter root URL-->
-      <v-container v-if="step===0" fluid>
+      <v-container v-if="step===1" fluid>
         <p>
           Lorem ipsum dolor sit amet. Eos voluptas sapiente <strong>Et porro ut voluptate deleniti vel iusto
             odit</strong> At maxime praesentium ut laudantium voluptatem! Vel rerum tenetur a nulla modi aut veritatis
@@ -136,7 +136,7 @@
               color="blue darken-1"
               @click="checkForm"
             >
-              Save
+              Add
             </v-btn>
           </v-col>
         </v-form>
@@ -155,7 +155,7 @@ const NsSnackbarStore = namespace('snackbarStore')
   middleware: 'auth'
 })
 export default class AddVideo extends Vue {
-  step: number = 0
+  step: number = 1
 
   // manifest
   manifest: string = ''
@@ -196,14 +196,18 @@ export default class AddVideo extends Vue {
     // validate URL
 
     try {
-      const r = await this.$axios.post('/api/v/load-manifest', {
+      const r = await this.$axios.post('/api/v/get-meta-from-manifest', {
         manifest: this.manifest
       })
-      console.log(r)
-
-      // this.step = 2
+      // get
+      const meta = r.data
+      console.log(meta)
+      // todo validate (at least length)
+      this.title = meta.title || ''
+      this.description = meta.description || ''
+      this.tags = meta.tags?.join(',') || ''
+      this.step = 2
     } catch (e) {
-      console.log(e.response)
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
