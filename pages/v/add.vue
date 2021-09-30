@@ -45,8 +45,11 @@
 
       <!--Step 2: edit info-->
       <v-container v-if="step===2" fluid>
+        <!--video player-->
+        <VideoPlayer :manifest-url="manifest" :poster-url="posterUrl" @error="handleVideoPlayerError" />
+
         <!--title-->
-        <v-form>
+        <v-form class="mt-6">
           <v-text-field
             v-model="title"
             filled
@@ -149,16 +152,19 @@
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import validator from 'validator'
 
+import VideoPlayer from '~/components/VideoPlayer.vue'
+
 const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
+  components: { VideoPlayer },
   middleware: 'auth'
 })
 export default class AddVideo extends Vue {
   step: number = 1
 
   // manifest
-  manifest: string = ''
+  manifest: string = 'https://v.autotube.app/DC6FirstLanding/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     (v: string) => validator.isURL(v) || 'URL is not valid',
@@ -178,8 +184,11 @@ export default class AddVideo extends Vue {
   playlists: string [] = []
   availablePlaylists: string[] = []
   playlistToAdd: string = ''
-
+  // tags
   tags: string = ''
+
+  // for VideoPlayer props
+  posterUrl: string = ''
 
   // store
   @NsSnackbarStore.Action
@@ -194,14 +203,18 @@ export default class AddVideo extends Vue {
   // https://v.autotube.app/DC6FirstLanding/dash.mpd
   private async loadManifest (): Promise<void> {
     // validate URL
-
+    // Get meta
     try {
       const r = await this.$axios.post('/api/v/get-meta-from-manifest', {
         manifest: this.manifest
       })
-      // get
+
+      // ok
+      // get posterURL
+      this.posterUrl = this.manifest.split('/').slice(0, -1).join('/') + '/thumbnail.jpg'
+
+      // get meta
       const meta = r.data
-      console.log(meta)
       // todo validate (at least length)
       this.title = meta.title || ''
       this.description = meta.description || ''
@@ -243,6 +256,16 @@ export default class AddVideo extends Vue {
     this.formIsValid = false
     console.log('click')
   }
+
+  // handle error event form VideoPlayer
+  private handleVideoPlayerError (e: Error): void {
+    this.step = 1
+    this.showSnackbar({
+      text: e.message || 'unable to play your video',
+      color: 'error'
+    }
+    )
+  }
 }
 
 </script>
@@ -250,4 +273,3 @@ export default class AddVideo extends Vue {
 <style scoped>
 
 </style>
-enTAtInt1
