@@ -149,6 +149,8 @@
 </template>
 
 <script lang="ts">
+// todo form validation
+// todo form submit
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import validator from 'validator'
 
@@ -161,6 +163,13 @@ const NsSnackbarStore = namespace('snackbarStore')
   middleware: 'auth'
 })
 export default class AddVideo extends Vue {
+  private readonly titleMaxLength = 250
+  private readonly descriptionMaxLength = 1024
+  private readonly maxTags = 10
+  // private readonly maxChannels = 10
+  // private readonly maxPlaylists = 10
+
+  // process step
   step: number = 1
 
   // manifest
@@ -202,8 +211,6 @@ export default class AddVideo extends Vue {
   // load manifest and return meta
   // https://v.autotube.app/DC6FirstLanding/dash.mpd
   private async loadManifest (): Promise<void> {
-    // validate URL
-    // Get meta
     try {
       const r = await this.$axios.post('/api/v/get-meta-from-manifest', {
         manifest: this.manifest
@@ -215,10 +222,18 @@ export default class AddVideo extends Vue {
 
       // get meta
       const meta = r.data
-      // todo validate (at least length)
-      this.title = meta.title || ''
-      this.description = meta.description || ''
-      this.tags = meta.tags?.join(',') || ''
+      this.title = meta.title?.substr(0, this.titleMaxLength) || ''
+      this.description = meta.description?.substr(0, this.descriptionMaxLength) || ''
+
+      if (meta.tags) {
+        // fool cast
+        meta.tags = meta.tags as string[]
+        if (meta.tags.length > 10) {
+          meta.tags = meta.tags.slice(0, this.maxTags)
+        }
+        this.tags = meta.tags?.join(', ') || ''
+      }
+      // show step 2 form
       this.step = 2
     } catch (e) {
       this.showSnackbar({
@@ -229,25 +244,29 @@ export default class AddVideo extends Vue {
   }
 
   // add playlist to available list
-  // todo check unique
-  // todo check max playlists
   private addPlaylist (): void {
     if (this.playlistToAdd.length !== 0) {
       this.playlistToAdd = this.playlistToAdd.charAt(0).toUpperCase() + this.playlistToAdd.slice(1)
-      this.availablePlaylists.push(this.playlistToAdd)
-      this.playlists.push(this.playlistToAdd)
+      if (!this.availablePlaylists.includes(this.playlistToAdd)) {
+        this.availablePlaylists.push(this.playlistToAdd)
+      }
+      if (!this.playlists.includes(this.playlistToAdd)) {
+        this.playlists.push(this.playlistToAdd)
+      }
       this.playlistToAdd = ''
     }
   }
 
-  // add channel
-  // todo check unique
-  // todo check max channel
+  // add channels
   private addChannel (): void {
     if (this.channelToAdd.length !== 0) {
       this.channelToAdd = this.channelToAdd.charAt(0).toUpperCase() + this.channelToAdd.slice(1)
-      this.availableChannels.push(this.channelToAdd)
-      this.channels.push(this.channelToAdd)
+      if (!this.availableChannels.includes(this.channelToAdd)) {
+        this.availableChannels.push(this.channelToAdd)
+      }
+      if (!this.channels.includes(this.channelToAdd)) {
+        this.channels.push(this.channelToAdd)
+      }
       this.channelToAdd = ''
     }
   }
