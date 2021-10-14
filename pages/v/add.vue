@@ -159,7 +159,9 @@ import VideoPlayer from '~/components/VideoPlayer.vue'
 const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
-  components: { VideoPlayer },
+  components: {
+    VideoPlayer
+  },
   middleware: 'auth'
 })
 export default class AddVideo extends Vue {
@@ -173,7 +175,7 @@ export default class AddVideo extends Vue {
   step: number = 1
 
   // manifest
-  manifest: string = 'https://v.autotube.app/DC6FirstLanding/dash.mpd'
+  manifest: string = 'https://v.autotube.app/dc6-first-landing/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     (v: string) => validator.isURL(v) || 'URL is not valid',

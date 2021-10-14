@@ -37,7 +37,8 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
 
   // load mpd file
   try {
-    await axios.get(manifest)
+    const r = await axios.get(manifest)
+    console.log(r)
   } catch (e) {
     // 404 not found
     if (e.response.status === 404) {
