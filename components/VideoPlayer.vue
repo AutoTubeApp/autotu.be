@@ -8,6 +8,7 @@
       <video
         id="video"
         ref="videoPlayer"
+        crossorigin="anonymous"
         style="width:100%"
         :poster="posterUrl"
       />
@@ -24,18 +25,19 @@ export default class VideoPlayer extends Vue {
   @Prop({ required: true }) readonly manifestUrl!: string
   @Prop({ required: true }) readonly posterUrl!: string
 
-  mounted () {
+  async mounted () {
     const shaka = require('shaka-player/dist/shaka-player.ui.js')
     const player = new shaka.Player(this.$refs.videoPlayer)
-    const ui = new shaka.ui.Overlay(
-      player,
-      this.$refs.videoContainer,
-      this.$refs.videoPlayer
-    )
-    ui.getControls()
-    // console.log(Object.keys(shaka.ui))
     try {
-      player.load(this.manifestUrl)
+      const ui = new shaka.ui.Overlay(
+        player,
+        this.$refs.videoContainer,
+        this.$refs.videoPlayer
+      )
+      ui.getControls()
+      // console.log(Object.keys(shaka.ui))
+      await player.load(this.manifestUrl)
+      this.$emit('loaded')
     } catch (e) {
       this.$emit('error', e)
     }

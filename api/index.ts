@@ -22,10 +22,16 @@ app.use(
     secret: process.env.ATT_JWT_SECRET!,
     algorithms: ['sha1', 'RS256', 'HS256']
   }).unless({
-    path: ['/api/session', '/api/validate-account', '/api/activate-account', '/api/reset-password', '/api/update-password-vid', {
-      url: '/api/user',
-      method: 'POST'
-    }]
+    path: ['/api/session',
+      '/api/validate-account',
+      '/api/activate-account',
+      '/api/reset-password',
+      '/api/update-password-vid',
+      {
+        url: '/api/user',
+        method: 'POST'
+      },
+      '/api/v/get-proxyfied-manifest']
   })
 )
 
@@ -53,6 +59,9 @@ app.put('/update-password-vid', hdlAuth.updatePasswordVid)
 //
 // video
 app.post('/v/get-meta-from-manifest', hdlVideo.getVideoMetaFromManifest)
+
+// get manifest (proxy to avoid CORS)
+app.get('/v/get-proxyfied-manifest', hdlVideo.getProxyfiedManifest)
 
 // update password
 // app.put('/update-password', update-password)

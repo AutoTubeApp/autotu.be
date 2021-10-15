@@ -5,7 +5,9 @@
 import express from 'express'
 import validator from 'validator'
 import axios from 'axios'
+import { decode } from 'js-base64'
 
+import logger from '../logger'
 import { ApiResponse } from '../classes/ApiResponse'
 
 // Checks if mpd exists
@@ -37,8 +39,7 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
 
   // load mpd file
   try {
-    const r = await axios.get(manifest)
-    console.log(r)
+    await axios.get(manifest)
   } catch (e) {
     // 404 not found
     if (e.response.status === 404) {
@@ -67,4 +68,58 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
       next(e)
     }
   }
+}
+
+// return video manifest from same hosts (CORS)
+// duplicate code to fix
+export const getProxyfiedManifest = async (req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  let manifest = req.query.u
+  if (typeof manifest !== 'string') {
+    logger.error(`${req.ip}: hdl getProxyfiedManifest: u is not a string: ${manifest}`)
+    res.status(400).send()
+    return
+  }
+  manifest = manifest as string
+
+  // decode base64
+  // if manifest is not a base64 encoded string, error will be catched later
+  manifest = decode(manifest)
+
+  // https://v.autotube.app/DC6FirstLanding/dash.mpd
+  // ECONNREFUSED
+  // manifest = 'v.autotube.app/DC6FirstLanding/dash.mpd'
+  // manifest = 'https://v.autotube.app/dc6-first-landing/dash.mp'
+
+  // validate is URL && extension is .mpd
+  if (!validator.isURL(manifest)) {
+    logger.error(`${req.ip}: hdl getProxyfiedManifest: u is not an url: ${manifest}`)
+    res.status(400).send()
+    return
+  }
+
+  if (manifest.split('.')?.pop()?.toLowerCase() !== 'mpd') {
+    logger.error(`${req.ip}: hdl getProxyfiedManifest: u extension is not mdp: ${manifest}`)
+    res.status(400).send()
+    return
+  }
+
+  // load mpd file
+  let body: string = ''
+  try {
+    const r = await axios.get(manifest)
+    // console.log(r)
+    body = r.data
+  } catch (e) {
+    // 404 not found
+    if (e.response.status === 404) {
+      logger.error(`${req.ip}: hdl getProxyfiedManifest: u not found on remote: ${manifest}`)
+      res.status(404).send()
+    } else {
+      logger.error(`${req.ip}: hdl getProxyfiedManifest: u remote return ${e.response.status} error : ${manifest}`)
+      res.status(e.response.status).send()
+    }
+    return
+  }
+  res.setHeader('Content-Type', 'application/dash+xml')
+  res.status(200).send(body)
 }

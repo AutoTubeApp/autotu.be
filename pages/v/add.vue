@@ -44,9 +44,18 @@
       </v-container>
 
       <!--Step 2: edit info-->
-      <v-container v-if="step===2" fluid>
+      <v-container
+        v-if="step===2"
+        :class="step2Visible ? '' : 'd-none'"
+        fluid
+      >
         <!--video player-->
-        <VideoPlayer :manifest-url="manifest" :poster-url="posterUrl" @error="handleVideoPlayerError" />
+        <VideoPlayer
+          :manifest-url="manifestProxifiedUrl"
+          :poster-url="posterUrl"
+          @error="handleVideoPlayerError"
+          @loaded="handleVideoLoaded"
+        />
 
         <!--title-->
         <v-form class="mt-6">
@@ -66,7 +75,7 @@
             auto-grow
             counter
             label="Description"
-            value="The Woodman set to work at once, and so sharp was his axe that the tree was soon chopped nearly through."
+            value=""
           />
 
           <!--channels-->
@@ -153,6 +162,7 @@
 // todo form submit
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import validator from 'validator'
+import { encode } from 'js-base64'
 
 import VideoPlayer from '~/components/VideoPlayer.vue'
 
@@ -173,8 +183,11 @@ export default class AddVideo extends Vue {
 
   // process step
   step: number = 1
+  // hide step 2
+  step2Visible = false
 
   // manifest
+  private manifestProxifiedUrl = ''
   manifest: string = 'https://v.autotube.app/dc6-first-landing/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
@@ -235,9 +248,12 @@ export default class AddVideo extends Vue {
         }
         this.tags = meta.tags?.join(', ') || ''
       }
+      // manifest URL for the player (through local proxy to avoid CORS)
+      this.manifestProxifiedUrl = '/api/v/get-proxyfied-manifest?u=' + encode(this.manifest)
       // show step 2 form
       this.step = 2
     } catch (e) {
+      this.step = 1
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
@@ -279,13 +295,18 @@ export default class AddVideo extends Vue {
   }
 
   // handle error event form VideoPlayer
-  private handleVideoPlayerError (e: Error): void {
+  private handleVideoPlayerError (): void {
+    // console.log('ERR FROM PLAYER' + e)
     this.step = 1
     this.showSnackbar({
-      text: e.message || 'unable to play your video',
+      text: 'Unable to play your video, check your manifest URL',
       color: 'error'
-    }
-    )
+    })
+  }
+
+  // when video is loaded
+  private handleVideoLoaded (): void {
+    this.step2Visible = true
   }
 }
 
