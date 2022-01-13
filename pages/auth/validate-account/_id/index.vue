@@ -149,7 +149,7 @@ export default class ValidateAccount extends Vue {
       this.validationIdIsValid = await this.$axios.put('/api/validate-account', {
         id: this.$route.params.id
       })
-    } catch (e) {
+    } catch (e:any) {
       // not found ?
       if (e.response?.status !== 404) {
         this.showSnackbar({
@@ -186,7 +186,7 @@ export default class ValidateAccount extends Vue {
           password: this.password
         }
       })
-    } catch (e) {
+    } catch (e:any) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'

@@ -22,10 +22,10 @@ export const postUser = async (req: express.Request, res: express.Response, next
       // silently (for user) drop potentially error
       try {
         await user.sendWelcomeEmail()
-      } catch (e) {
+      } catch (e:any) {
         logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
       }
-    } catch (e) {
+    } catch (e:any) {
       if (e instanceof AttError) {
         res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
         next()
@@ -105,7 +105,7 @@ export const activateAccount = async (req: express.Request, res: express.Respons
     //  just log error
     try {
       await user.subscribeToNewsletter()
-    } catch (e) {
+    } catch (e:any) {
       // just log error
       logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
     }
@@ -213,6 +213,7 @@ export const newSession = async (req: express.Request, res: express.Response, ne
 
     // create access token
     const expiresIn: string = '24h'
+    // eslint-disable-next-line import/no-named-as-default-member
     const accessToken = jsonwebtoken.sign(
       {
         uuid: user.uuid,

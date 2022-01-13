@@ -24,6 +24,7 @@ export class User {
   private _validationId?: string
 
   constructor (email: string) {
+    // eslint-disable-next-line import/no-named-as-default-member
     if (!validator.isEmail(email)) {
       throw AttError.New(`new user: bad email '${email}'`, `'${email}' is not a valid email`)
     }
@@ -36,6 +37,7 @@ export class User {
 
   public set email (email: string) {
     // validate email
+    // eslint-disable-next-line import/no-named-as-default-member
     if (!validator.isEmail(email)) {
       throw AttError.New(`set email: invalid email '${email}'`, `'${email}' is not a valid email`)
     }
@@ -66,6 +68,7 @@ export class User {
       throw AttError.New(`bad length for username, should be between 4 and 21, ${username.length} given`, 'bad length for username, must be between 4 and 21 chars.')
     }
     // alphanumeric
+    // eslint-disable-next-line import/no-named-as-default-member
     if (!validator.isAlphanumeric(username)) {
       throw AttError.New('username must be alphanumeric', 'username must be alphanumeric.')
     }
@@ -189,7 +192,7 @@ export class User {
           validationId: u._validationId
         }
       )
-    } catch (e) {
+    } catch (e:any) {
       if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
         // get user to check if he has completed his registration
         // if not act if it's a new user

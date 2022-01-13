@@ -191,6 +191,7 @@ export default class AddVideo extends Vue {
   manifest: string = 'https://v.autotube.app/dc6-first-landing/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
+    // eslint-disable-next-line import/no-named-as-default-member
     (v: string) => validator.isURL(v) || 'URL is not valid',
     (v: string) => v.split('.')?.pop()?.toLowerCase() === 'mpd' || 'dash manifest must have .mpd extension'
   ]
@@ -252,7 +253,7 @@ export default class AddVideo extends Vue {
       this.manifestProxifiedUrl = '/api/v/get-proxyfied-manifest?u=' + encode(this.manifest)
       // show step 2 form
       this.step = 2
-    } catch (e) {
+    } catch (e:any) {
       this.step = 1
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
@@ -291,7 +292,7 @@ export default class AddVideo extends Vue {
 
   private checkForm (): void {
     this.formIsValid = false
-    console.log('click')
+    // console.log('click')
   }
 
   // handle error event form VideoPlayer

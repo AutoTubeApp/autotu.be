@@ -80,7 +80,7 @@ export default class PasswordLost extends Vue {
     try {
       await this.$axios.post('/api/reset-password', { email: this.email })
       this.step = 1
-    } catch (e) {
+    } catch (e:any) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'

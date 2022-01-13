@@ -23,6 +23,7 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   // manifest = 'https://v.autotube.app/DC6FirstLandingo/dash.mpd'
 
   // validate is URL && extension is .mpd
+  // eslint-disable-next-line import/no-named-as-default-member
   if (!validator.isURL(manifest)) {
     res.locals.response = response.setResponse(400, 'URL is not valid', 1,
       `getVideoMetaFromManifest failed: bad URL for manifest: ${manifest}`)
@@ -40,7 +41,7 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   // load mpd file
   try {
     await axios.get(manifest)
-  } catch (e) {
+  } catch (e:any) {
     // 404 not found
     if (e.response.status === 404) {
       res.locals.response = response.setResponse(400, 'Remote server reply with a "Not Found" error (404). Check your URL.', 1,
@@ -61,7 +62,7 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   try {
     const r = await axios.get(`${remoteRootPath}/meta.json`)
     res.status(200).json(r.data)
-  } catch (e) {
+  } catch (e:any) {
     if (e.response?.status === 404) {
       res.status(200).json({})
     } else {
@@ -82,7 +83,7 @@ export const getProxyfiedManifest = async (req: express.Request, res: express.Re
   manifest = manifest as string
 
   // decode base64
-  // if manifest is not a base64 encoded string, error will be catched later
+  // if manifest is not a base64 encoded string, error will be caught later
   manifest = decode(manifest)
 
   // https://v.autotube.app/DC6FirstLanding/dash.mpd
@@ -91,6 +92,7 @@ export const getProxyfiedManifest = async (req: express.Request, res: express.Re
   // manifest = 'https://v.autotube.app/dc6-first-landing/dash.mp'
 
   // validate is URL && extension is .mpd
+  // eslint-disable-next-line import/no-named-as-default-member
   if (!validator.isURL(manifest)) {
     logger.error(`${req.ip}: hdl getProxyfiedManifest: u is not an url: ${manifest}`)
     res.status(400).send()
@@ -109,7 +111,7 @@ export const getProxyfiedManifest = async (req: express.Request, res: express.Re
     const r = await axios.get(manifest)
     // console.log(r)
     body = r.data
-  } catch (e) {
+  } catch (e:any) {
     // 404 not found
     if (e.response.status === 404) {
       logger.error(`${req.ip}: hdl getProxyfiedManifest: u not found on remote: ${manifest}`)

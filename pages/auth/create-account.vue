@@ -130,7 +130,7 @@ export default class CreateAccount extends Vue {
       })
       // change display
       this.step = 2
-    } catch (e) {
+    } catch (e:any) {
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
