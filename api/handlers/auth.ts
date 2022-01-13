@@ -124,7 +124,7 @@ export const activateAccount = async (req: express.Request, res: express.Respons
 }
 
 // reset password
-// send an email to user (if exits) to reset his password
+// email user (if exits) to reset his password
 export const resetPassword = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const response = new ApiResponse()
   try {
@@ -142,6 +142,7 @@ export const resetPassword = async (req: express.Request, res: express.Response,
     await user.sendResetPasswordEmail()
     res.status(200).send()
   } catch (e) {
+    console.log(e)
     next(e)
   }
 }

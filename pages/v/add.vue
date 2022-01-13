@@ -314,5 +314,4 @@ export default class AddVideo extends Vue {
 </script>
 
 <style scoped>
-
 </style>
