@@ -76,7 +76,16 @@ const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth',
-  auth: 'guest'
+  auth: 'guest',
+  head: {
+    title: 'Reset your password',
+    meta: [
+      {
+        name: 'description',
+        content: 'Reset your Autotube password'
+      }
+    ]
+  }
 })
 export default class resetPassword extends Vue {
   // props

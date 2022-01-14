@@ -80,7 +80,16 @@ const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth',
-  auth: 'guest'
+  auth: 'guest',
+  head: {
+    title: 'Validate account',
+    meta: [
+      {
+        name: 'description',
+        content: 'Validate account your account'
+      }
+    ]
+  }
 })
 export default class ValidateAccount extends Vue {
   // props

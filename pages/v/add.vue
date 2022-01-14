@@ -172,7 +172,16 @@ const NsSnackbarStore = namespace('snackbarStore')
   components: {
     VideoPlayer
   },
-  middleware: 'auth'
+  middleware: 'auth',
+  head: {
+    title: 'Add a new video',
+    meta: [
+      {
+        name: 'description',
+        content: 'Add a new video to your library'
+      }
+    ]
+  }
 })
 export default class AddVideo extends Vue {
   private readonly titleMaxLength = 250

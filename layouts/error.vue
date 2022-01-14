@@ -7,7 +7,7 @@
       {{ otherError }}
     </h1>
     <NuxtLink to="/">
-      Home page
+      Return to home page
     </NuxtLink>
   </v-app>
 </template>
@@ -28,15 +28,12 @@ export default {
     }
   },
   head () {
-    const title =
-      this.error.statusCode === 404 ? this.pageNotFound : this.otherError
     return {
-      title
+      title: this.error.statusCode === 404 ? this.pageNotFound : this.otherError
     }
   }
 }
 </script>
-
 <style scoped>
 h1 {
   font-size: 20px;

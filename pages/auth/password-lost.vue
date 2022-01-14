@@ -57,7 +57,16 @@ const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth',
-  auth: 'guest'
+  auth: 'guest',
+  head: {
+    title: 'Recover your password',
+    meta: [
+      {
+        name: 'description',
+        content: 'Recover your password'
+      }
+    ]
+  }
 })
 export default class PasswordLost extends Vue {
   private step: number = 0

@@ -56,7 +56,16 @@ const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth',
-  auth: 'guest'
+  auth: 'guest',
+  head: {
+    title: 'Sign in',
+    meta: [
+      {
+        name: 'description',
+        content: 'Sign in to your account'
+      }
+    ]
+  }
 })
 export default class Auth extends Vue {
   // store

@@ -91,7 +91,16 @@ const NsSnackbarStore = namespace('snackbarStore')
 
 @Component({
   middleware: 'auth',
-  auth: 'guest'
+  auth: 'guest',
+  head: {
+    title: 'Create an account',
+    meta: [
+      {
+        name: 'description',
+        content: 'Create a new Autotube account'
+      }
+    ]
+  }
 })
 export default class CreateAccount extends Vue {
   private step: number = 1

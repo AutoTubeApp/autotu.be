@@ -23,6 +23,15 @@ import VideoThumb from '~/components/VideoThumb.vue'
 @Component({
   components: {
     VideoThumb
+  },
+  head: {
+    title: 'Decentralized video sharing',
+    meta: [
+      {
+        name: 'description',
+        content: 'Autotube is a decentralized video sharing platform'
+      }
+    ]
   }
 })
 export default class Index extends Vue {

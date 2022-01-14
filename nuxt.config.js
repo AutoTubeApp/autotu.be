@@ -3,8 +3,8 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - autotu.be',
-    title: 'autotu.be',
+    titleTemplate: '%s - Autotube',
+    title: 'Decentralized Youtube alternative',
     htmlAttrs: {
       lang: 'en'
     },
