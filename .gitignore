@@ -89,3 +89,4 @@ sw.*
 # Vim swap files
 *.swp
 /api/.env.production
+/api/.env.development
