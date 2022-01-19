@@ -241,11 +241,13 @@ export class User {
     await sib.sendTemplatedMail(this._email, 1, { validationId: this._validationId })
   }
 
+  // send  reset password email
   public async sendResetPasswordEmail (): Promise<void> {
     const sib = new SendInBlue()
     await sib.sendTemplatedMail(this._email, 2, { validationId: this._validationId })
   }
 
+  // subscribe user to the newsletter
   public async subscribeToNewsletter (): Promise<void> {
     const sib = new SendInBlue()
     await sib.subscribeToNewsletter(this._email, 2)
