@@ -38,6 +38,7 @@ app.use(
 // register a new user
 app.post('/user', hdlAuth.postUser)
 
+/*
 // get user
 app.get('/user', hdlAuth.getUser)
 
@@ -55,6 +56,7 @@ app.post('/reset-password', hdlAuth.resetPassword)
 
 // change password
 app.put('/update-password-vid', hdlAuth.updatePasswordVid)
+*/
 
 //
 // video

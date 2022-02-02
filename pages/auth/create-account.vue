@@ -106,13 +106,13 @@ export default class CreateAccount extends Vue {
   private step: number = 1
   private valid: boolean = false
 
-  private email: string = ''
+  private email: string = 'toorop@gmail.com'
   emailRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'E-mail is required',
     (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
   ]
 
-  private tos: boolean = false
+  private tos: boolean = true
   // public subscribe2nl: boolean = false
 
   private tosRules: ((v: boolean) => string | boolean)[] = [

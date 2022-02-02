@@ -6,14 +6,14 @@ import Db from '../Db'
 import { AttError } from './Error'
 import { SendInBlue } from './SendInBlue'
 
-// User properties (used for assign props to user)
+/* // User properties (used for assign props to user)
 interface IUserProps {
   email: string
   uuid?: string
   username?: string
   password?: string
   validationId?: string
-}
+} */
 
 // Autotube User
 export class User {
@@ -113,66 +113,75 @@ export class User {
     this._validationId = validationId
   }
 
-  // check if username exists
+  // update validationId
+  public updateValidationId (): void {
+    this._validationId = uuidV4()
+  }
+
+  /*
+   // check if username exists
   public static async UsernameExists (username: string): Promise<boolean> {
     username = username.toLowerCase()
     const u = await User.GetUserByUsername(username)
     return u !== null
   }
 
-  // update validationId
-  public updateValidationId (): void {
-    this._validationId = uuidV4()
-  }
+// Get user by email
+public static async GetUser (email: string): Promise<User | null> {
+  const db = Db.getInstance()
 
-  // Get user by email
-  public static async GetUser (email: string): Promise<User | null> {
-    const db = Db.getInstance()
-
-    const r = await db.session.run(
-      'MATCH (u:User {email: $email}) RETURN u',
-      { email }
-    )
-    if (r.records.length === 0) {
-      return null
-    }
-    const dbUser = r.records[0].get('u').properties as IUserProps
-    const user = new User(email)
-    user.assignPropertiesOf(dbUser)
-    return user
+  const r = await db.session.run(
+    'MATCH (u:User {email: $email}) RETURN u',
+    { email }
+  )
+  if (r.records.length === 0) {
+    return null
   }
+  const dbUser = r.records[0].get('u').properties as IUserProps
+  const user = new User(email)
+  user.assignPropertiesOf(dbUser)
+  return user
+}
+*/
 
   // get user by validationId
   public static async GetUserByValidationId (validationId: string): Promise<User | null> {
     const db = Db.getInstance()
 
-    const r = await db.session.run('MATCH (u:User {validationId: $validationId}) RETURN u',
-      { validationId }
-    )
-    if (r.records.length === 0) {
-      return null
+    try {
+      const r = await db.pool.query(
+        'SELECT * FROM users WHERE validationId = $1',
+        [validationId]
+      )
+
+      r.rowCount
+    } catch (e:any) {
+      throw AttError.New('GetUserByValidationId', e.message)
     }
-    const dbUser = r.records[0].get('u').properties as IUserProps
-    const user = new User(dbUser.email)
-    user.assignPropertiesOf(dbUser)
-    return user
+
+    // const dbUser = r.records[0].get('u').properties as IUserProps
+    // const user = new User(dbUser.email)
+    // user.assignPropertiesOf(dbUser)
+    return null
   }
 
-  // get user by validationId
-  public static async GetUserByUsername (username: string): Promise<User | null> {
-    const db = Db.getInstance()
+  /*
+// get user by validationId
+public static async GetUserByUsername (username: string): Promise<User | null> {
+  const db = Db.getInstance()
 
-    const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
-      { username }
-    )
-    if (r.records.length === 0) {
-      return null
-    }
-    const dbUser = r.records[0].get('u').properties as IUserProps
-    const user = new User(dbUser.email)
-    user.assignPropertiesOf(dbUser)
-    return user
+  const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
+    { username }
+  )
+  if (r.records.length === 0) {
+    return null
   }
+  const dbUser = r.records[0].get('u').properties as IUserProps
+  const user = new User(dbUser.email)
+  user.assignPropertiesOf(dbUser)
+  return user
+}
+*/
 
   // create a new user
   public static async Create (email: string): Promise<User> {
@@ -183,35 +192,39 @@ export class User {
     // u.password = await hash(password, 10)
 
     const db = Db.getInstance()
+    // eslint-disable-next-line no-useless-catch
     try {
-      await db.session.run(
-        'CREATE (n:User {email: $email,  uuid: $uuid, emailVerified: false, validationId: $validationId})',
-        {
-          email: u._email,
-          uuid: u._uuid,
-          validationId: u._validationId
-        }
+      await db.pool.query(
+        'INSERT INTO users (uuid, email, validation_id) VALUES ($1, $2, $3)',
+        [u._uuid, u._email, u._validationId]
       )
-    } catch (e:any) {
-      if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
-        // get user to check if he has completed his registration
-        // if not act if it's a new user
-        const r = await this.GetUser(u._email) as User
-        if (r._password !== undefined) {
-          throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
-        }
-        u._uuid = r._uuid
-        u._validationId = r._validationId
-      } else {
-        throw e
+      return u
+    } catch (e: any) {
+      /*      if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
+              // get user to check if he has completed his registration
+              // if not act if it's a new user
+              const r = await this.GetUser(u._email) as User
+              if (r._password !== undefined) {
+                throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
+              }
+              u._uuid = r._uuid
+              u._validationId = r._validationId
+            } else {
+            */
+      if (e.message.startsWith('duplicate key')) {
+        // user exists
+        // if password is undefined, it means that the user has not completed his registration
+        // todo: check if user has completed his registration
+
+        throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
       }
+      throw e
     }
-    return u
   }
 
   // assign properties from object fetch from DB to instance
   // Warning !!! no type check is made, nor validation be sure of your properties
-  private assignPropertiesOf (properties: IUserProps): void {
+  /* private assignPropertiesOf (properties: IUserProps): void {
     this._email = properties.email
     this._username = properties.username
     this._uuid = properties.uuid
@@ -234,7 +247,7 @@ export class User {
       }
     )
   }
-
+*/
   // send welcome email
   public async sendWelcomeEmail (): Promise<void> {
     const sib = new SendInBlue()

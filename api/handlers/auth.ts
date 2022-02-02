@@ -23,7 +23,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
       try {
         await user.sendWelcomeEmail()
       } catch (e:any) {
-        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e.message}`)
+        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e}`)
       }
     } catch (e:any) {
       if (e instanceof AttError) {
@@ -61,6 +61,7 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   res.status(201).send()
 }
 
+/*
 // activateAccount
 // user send username && password
 export const activateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -240,3 +241,4 @@ export const newSession = async (req: express.Request, res: express.Response, ne
     }
   }
 }
+*/
