@@ -5,7 +5,8 @@ import * as hdlAuth from './handlers/auth'
 import * as hdlVideo from './handlers/video'
 import './config'
 import logger from './logger'
-import { handleResponse } from './middlewares/handleResponse'
+// import { handleResponse } from './middlewares/handleResponse'
+import { AttError } from './classes/Error'
 
 // ensure config
 const secret = process.env.ATT_JWT_SECRET
@@ -41,10 +42,11 @@ app.post('/user', hdlAuth.postUser)
 /*
 // get user
 app.get('/user', hdlAuth.getUser)
-
+*/
 // authentification
-app.post('/session', hdlAuth.newSession)
+// app.post('/session', hdlAuth.newSession)
 
+/*
 // email validation => activate (set username && password)
 app.put('/validate-account', hdlAuth.validateAccount)
 
@@ -69,12 +71,32 @@ app.get('/v/get-proxyfied-manifest', hdlVideo.getProxyfiedManifest)
 // app.put('/update-password', update-password)
 
 // response handler middleware (if response)
-app.use(handleResponse)
+// app.use(handleResponse)
 
 // ultimate error handler middleware
 app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error(`${err.status || 500} - ${res.statusMessage} - ${err.message} - ${err.stack} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
-  res.status(500).send('Oops!')
+  if (err instanceof AttError) {
+    const logMessage = `${req.ip} - ${req.originalUrl} - ${req.method} - ${err.code} - ${err.message}`
+    if (err.code && err.code > 400) {
+      logger.error(logMessage)
+    } else {
+      logger.info(logMessage)
+    }
+    if (!err.code) {
+      err.code = 500
+    }
+    if (!err.userMessage) {
+      err.userMessage = 'Oops something went wrong'
+    }
+    const response = {
+      message: err.userMessage
+    }
+    res.status(err.code).json(response)
+  } else {
+    const logMessage = `${req.ip} - ${req.originalUrl} - ${req.method} - ${res.statusMessage} - ${err.message}`
+    logger.error(logMessage)
+    res.status(500).send('Oops!')
+  }
 })
 
 // export
