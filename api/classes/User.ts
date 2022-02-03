@@ -17,6 +17,7 @@ interface IUserProps {
 
 // Autotube User
 export class User {
+  private _id?: number
   private _email: string
   private _uuid?: string
   private _username?: string
@@ -29,6 +30,14 @@ export class User {
       throw AttError.New(`new user: bad email '${email}'`, `'${email}' is not a valid email`)
     }
     this._email = email.toLowerCase()
+  }
+
+  public get id (): number | undefined {
+    return this._id
+  }
+
+  public set id (id: number | undefined) {
+    this._id = id
   }
 
   public get email (): string {
@@ -55,9 +64,9 @@ export class User {
   public set username (username: string | undefined) {
     // validation
     if (!username) {
-      throw AttError.New('username is undefined', 'username is required.')
+      this._username = username
+      return
     }
-
     // - no space
     if (/\s/.test(username)) {
       throw AttError.New('spaces are not allowed in username', 'spaces are not allowed in username.')
@@ -101,6 +110,10 @@ export class User {
     this._password = await hash(password, 10)
   }
 
+  public set password (password: string | undefined) {
+    this._password = password
+  }
+
   public get password (): string | undefined {
     return this._password
   }
@@ -126,24 +139,29 @@ export class User {
     return u !== null
   }
 
-// Get user by email
-public static async GetUser (email: string): Promise<User | null> {
-  const db = Db.getInstance()
+   */
+  // Get user by email
 
-  const r = await db.session.run(
-    'MATCH (u:User {email: $email}) RETURN u',
-    { email }
-  )
-  if (r.records.length === 0) {
-    return null
+  public static async GetUser (email: string): Promise<User | null> {
+    let r: any
+    const db = Db.getInstance()
+    try {
+      r = await db.pool.query(
+        'SELECT * FROM users WHERE email = $1',
+        [email]
+      )
+      if (r.rows.length === 0) {
+        return null
+      }
+    } catch (e:any) {
+      throw AttError.New('GetUSer', e.message)
+    }
+    // to camel case
+    r.rows[0].validationId = r.rows[0].validation_id
+    delete r.rows[0].validation_id
+    return Object.assign(new User(email), r.rows[0])
   }
-  const dbUser = r.records[0].get('u').properties as IUserProps
-  const user = new User(email)
-  user.assignPropertiesOf(dbUser)
-  return user
-}
-*/
-
+  /*
   // get user by validationId
   public static async GetUserByValidationId (validationId: string): Promise<User | null> {
     const db = Db.getInstance()
@@ -189,8 +207,6 @@ public static async GetUserByUsername (username: string): Promise<User | null> {
     u._uuid = uuidV4()
     u._validationId = uuidV4()
 
-    // u.password = await hash(password, 10)
-
     const db = Db.getInstance()
     // eslint-disable-next-line no-useless-catch
     try {
@@ -200,25 +216,17 @@ public static async GetUserByUsername (username: string): Promise<User | null> {
       )
       return u
     } catch (e: any) {
-      /*      if (e.code === 'Neo.ClientError.Schema.ConstraintValidationFailed') {
-              // get user to check if he has completed his registration
-              // if not act if it's a new user
-              const r = await this.GetUser(u._email) as User
-              if (r._password !== undefined) {
-                throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
-              }
-              u._uuid = r._uuid
-              u._validationId = r._validationId
-            } else {
-            */
       if (e.message.startsWith('duplicate key')) {
         // user exists
         // if password is undefined, it means that the user has not completed his registration
-        // todo: check if user has completed his registration
-
-        throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`)
+        const user = await this.GetUser(u._email) as User
+        if (!user.password) {
+          throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`, 400)
+        }
+      } else {
+        throw e
       }
-      throw e
+      return u
     }
   }
 

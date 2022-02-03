@@ -1,38 +1,21 @@
 import express from 'express'
 import jsonwebtoken from 'jsonwebtoken'
 import { compare } from 'bcrypt'
-import { ApiResponse } from '../classes/ApiResponse'
 import logger from '../logger'
 import { User } from '../classes/User'
 import { AttError } from '../classes/Error'
 
 // register new user
 export const postUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
-
   try {
     const { email } = req.body
-    let user: User
-
+    // create user
+    const user = await User.Create(email)
+    // send welcome email silently (for user) drop potentially error
     try {
-      // create user
-      user = await User.Create(email)
-
-      // send welcome email
-      // silently (for user) drop potentially error
-      try {
-        await user.sendWelcomeEmail()
-      } catch (e:any) {
-        logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e}`)
-      }
+      await user.sendWelcomeEmail()
     } catch (e:any) {
-      if (e instanceof AttError) {
-        res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
-        next()
-      } else {
-        next(e)
-      }
-      return
+      logger.error(`${req.ip}: hdl postUser - user.SendWelcomeEmail() failed for user ${user.uuid}: ${e}`)
     }
     logger.info(`user.create: new user  ${user.uuid} (${user.email})`)
     res.status(201).send()
@@ -41,6 +24,7 @@ export const postUser = async (req: express.Request, res: express.Response, next
   }
 }
 
+/*
 // second step for registration
 // just validate validationID (is set for one user
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
@@ -60,7 +44,7 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   }
   res.status(201).send()
 }
-
+*/
 /*
 // activateAccount
 // user send username && password

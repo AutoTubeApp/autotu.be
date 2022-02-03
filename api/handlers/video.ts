@@ -8,13 +8,11 @@ import axios from 'axios'
 import { decode } from 'js-base64'
 
 import logger from '../logger'
-import { ApiResponse } from '../classes/ApiResponse'
+import { AttError } from '../classes/Error'
 
 // Checks if mpd exists
 // Returns video meta by loading remote meta.json (if exists)
 export const getVideoMetaFromManifest = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
-
   const { manifest } = req.body
 
   // https://v.autotube.app/DC6FirstLanding/dash.mpd
@@ -25,17 +23,11 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   // validate is URL && extension is .mpd
   // eslint-disable-next-line import/no-named-as-default-member
   if (!validator.isURL(manifest)) {
-    res.locals.response = response.setResponse(400, 'URL is not valid', 1,
-      `getVideoMetaFromManifest failed: bad URL for manifest: ${manifest}`)
-    next()
-    return
+    throw new AttError(`getVideoMetaFromManifest failed: bad URL for manifest: ${manifest}`, 'URL is not valid')
   }
 
   if (manifest.split('.')?.pop()?.toLowerCase() !== 'mpd') {
-    res.locals.response = response.setResponse(400, 'URL is not valid, extension must be .mpd', 1,
-      `getVideoMetaFromManifest failed: bad URL for manifest, not mpd: ${manifest}`)
-    next()
-    return
+    throw new AttError(`getVideoMetaFromManifest failed: bad URL for manifest, not mpd: ${manifest}`, 'URL is not valid')
   }
 
   // load mpd file
@@ -44,14 +36,9 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   } catch (e:any) {
     // 404 not found
     if (e.response.status === 404) {
-      res.locals.response = response.setResponse(400, 'Remote server reply with a "Not Found" error (404). Check your URL.', 1,
-        `getVideoMetaFromManifest failed: get 404 from remote server: ${manifest}`)
-    } else {
-      res.locals.response = response.setResponse(400, `Remote server reply with a error ${e.reponse.statusText}. Check your URL.`, 1,
-        `getVideoMetaFromManifest failed: get ${e.reponse.status} - ${e.response.statusText} from remote server: ${manifest}`)
+      throw new AttError(`getVideoMetaFromManifest failed: manifest not found: ${manifest}`, 'Remote server reply with a "Not Found" error (404). Check your URL.')
     }
-    next()
-    return
+    throw new AttError(`getVideoMetaFromManifest failed: get ${e.reponse.status} - ${e.response.statusText} from remote server: ${manifest}`, `Remote server reply with a error ${e.reponse.statusText}. Check your URL.`)
   }
 
   // OK manifest exists
