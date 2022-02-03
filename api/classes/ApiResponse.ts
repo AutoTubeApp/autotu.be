@@ -1,3 +1,4 @@
+/*
 import { GetResponseBody, LogLevel } from '../types'
 
 export class ApiResponse {
@@ -40,3 +41,4 @@ export class ApiResponse {
     return this
   }
 }
+*/

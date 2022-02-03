@@ -1,3 +1,4 @@
+/*
 import express from 'express'
 import logger from '../logger'
 import { LogLevel } from '../types'
@@ -39,3 +40,4 @@ export const handleResponse = (req: express.Request, res: express.Response, next
   }
   // next()
 }
+*/
