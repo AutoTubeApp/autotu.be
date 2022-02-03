@@ -131,15 +131,13 @@ export class User {
     this._validationId = uuidV4()
   }
 
-  /*
-   // check if username exists
+  // check if username exists
   public static async UsernameExists (username: string): Promise<boolean> {
     username = username.toLowerCase()
     const u = await User.GetUserByUsername(username)
     return u !== null
   }
 
-   */
   // Get user by email
   public static async GetUser (email: string): Promise<User | null> {
     const db = Db.getInstance()
@@ -172,23 +170,23 @@ export class User {
     return Object.assign(new User(r.rows[0].email), r.rows[0])
   }
 
-  /*
   // get user by username
   public static async GetUserByUsername (username: string): Promise<User | null> {
     const db = Db.getInstance()
 
-    const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
-      { username }
+    const r = await db.pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
     )
-    if (r.records.length === 0) {
+    if (r.rows.length === 0) {
       return null
     }
-    const dbUser = r.records[0].get('u').properties as IUserProps
-    const user = new User(dbUser.email)
-    user.assignPropertiesOf(dbUser)
-    return user
+    // to camel case
+    r.rows[0].validationId = r.rows[0].validation_id
+    delete r.rows[0].validation_id
+    return Object.assign(new User(r.rows[0].email), r.rows[0])
   }
-*/
+
   // create a new user
   public static async Create (email: string): Promise<User> {
     const u = new User(email)
@@ -222,32 +220,15 @@ export class User {
     }
   }
 
-  // assign properties from object fetch from DB to instance
-  // Warning !!! no type check is made, nor validation be sure of your properties
-  /* private assignPropertiesOf (properties: IUserProps): void {
-    this._email = properties.email
-    this._username = properties.username
-    this._uuid = properties.uuid
-    this._password = properties.password
-    this._validationId = properties.validationId
-  }
-
   // save User instance in DB
   public async save (): Promise<void> {
     const db = Db.getInstance()
-
-    await db.session.run(
-      'MATCH (u:User {uuid: $uuid}) SET u += { email: $email, username: $username, password: $password, validationId: $validationId}',
-      {
-        uuid: this._uuid,
-        email: this._email,
-        username: this._username,
-        password: this._password,
-        validationId: this._validationId
-      }
+    await db.pool.query(
+      'UPDATE users SET email = $1, username = $2, password = $3, validation_id = $4 WHERE uuid = $5',
+      [this._email, this._username, this._password, this._validationId, this._uuid]
     )
   }
-*/
+
   // send welcome email
   public async sendWelcomeEmail (): Promise<void> {
     const sib = new SendInBlue()

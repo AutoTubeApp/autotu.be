@@ -44,69 +44,63 @@ export const validateAccount = async (req: express.Request, res: express.Respons
   res.status(201).send()
 }
 
-/*
 // activateAccount
 // user send username && password
 export const activateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
   const {
     id,
     username,
     password
   } = req.body
 
-  try {
-    // check ID (normally useless but...)
-    const user = await User.GetUserByValidationId(id)
-    // no user (user === null)
-    if (user === null) {
-      res.locals.response = response.setResponse(400, 'Don\'t be evil !', 1,
-        `activateAccount failed: bad validation id: ${id}`)
-      next()
-      return
-    }
-
-    // set user password, and username
-    // check if username exists
-    if (await User.UsernameExists(username)) {
-      res.locals.response = response.setResponse(400,
-        `username ${username} already exists`,
-        1,
-        `username ${username} already exists`
-      )
-      next()
-      return
-    }
-
-    user.username = username
-    await user.setPassword(password)
-    user.updateValidationId()
-
-    // save user in DB
-    await user.save()
-
-    // subscribe to newsletter
-    //  just log error
-    try {
-      await user.subscribeToNewsletter()
-    } catch (e:any) {
-      // just log error
-      logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
-    }
-
-    // OK !
-    res.locals.response = response.setResponse(201, '', 1, `activateAccount: ${user.uuid} (${user.email}) activated`, { email: user.email })
-    next()
-  } catch (e) {
-    if (e instanceof AttError) {
-      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
-      next()
-    } else {
-      next(e)
-    }
+  // check ID (normally useless but...)
+  let user = await User.GetUserByValidationId(id)
+  // no user (user === null)
+  if (user === null) {
+    next(AttError.New(
+        `auth.activateAccount: bad validation id ${id}`,
+        'Don\'t be a fool, you can\'t activate an account with a bad validation id',
+        404)
+    )
   }
+
+  // not null
+  user = user as User
+
+  // set user password, and username
+  // check if username exists
+  if (await User.UsernameExists(username)) {
+    next(AttError.New(
+        `username ${username} already exists`,
+        username`${username} already exists`,
+        400)
+    )
+  }
+
+  user.username = username
+  await user.setPassword(password)
+  // todo uncomment
+  // user.updateValidationId()
+
+  // save user in DB
+  await user.save()
+
+  // subscribe to newsletter
+  //  just log error
+  try {
+    await user.subscribeToNewsletter()
+  } catch (e:any) {
+    // just log error
+    logger.error(`${req.ip}: hdl activateAccount - user.subscribeToNewsletter() failed for user ${user.uuid}: ${e.message}`)
+  }
+
+  // OK !
+  logger.info(`user.activateAccount: user ${user.uuid} (${user.email}) activated`)
+  const response = { email: user.email }
+  res.status(201).json(response)
 }
 
+/*
 // reset password
 // email user (if exits) to reset his password
 export const resetPassword = async (req: express.Request, res: express.Response, next: express.NextFunction) => {

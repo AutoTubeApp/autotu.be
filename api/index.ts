@@ -50,7 +50,7 @@ app.get('/user', hdlAuth.getUser)
 app.put('/validate-account', hdlAuth.validateAccount)
 
 // activate account (user set username && password
-// app.put('/activate-account', hdlAuth.activateAccount)
+app.put('/activate-account', hdlAuth.activateAccount)
 
 // reset-password-1 send an email
 // app.post('/reset-password', hdlAuth.resetPassword)

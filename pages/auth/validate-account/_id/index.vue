@@ -107,8 +107,8 @@ export default class ValidateAccount extends Vue {
     (v: string) => v.length <= 20 || 'Username length must be of 4-20'
   ]
 
-  private password: string = 'automurphy'
-  private rePassword: string = 'automurphy'
+  private password: string = 'autobuffalo'
+  private rePassword: string = 'autobuffalo'
   private passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
     (v: string) => (v.length >= 8) || 'Password length must be of 8-15',
@@ -185,7 +185,8 @@ export default class ValidateAccount extends Vue {
         username: this.username
       })
 
-      const email = response.data.payload.email
+      console.log(response)
+      const email = response.data.email
 
       // auth request
       // const response: void | HTTPResponse =
@@ -196,6 +197,7 @@ export default class ValidateAccount extends Vue {
         }
       })
     } catch (e:any) {
+      console.log(e)
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
