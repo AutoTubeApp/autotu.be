@@ -86,32 +86,32 @@ const NsSnackbarStore = namespace('snackbarStore')
     meta: [
       {
         name: 'description',
-        content: 'Validate account your account'
+        content: 'Validate your account'
       }
     ]
   }
 })
 export default class ValidateAccount extends Vue {
   // props
-  private step: number = 0
+  private step: number = 1
   private formIsValid: boolean = false
   private validationIdIsValid: boolean = false
 
   // to check passwords match
   private passwordsErrorMessage = ''
 
-  private username: string = ''
+  private username: string = 'Toorop'
   private usernameRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Username is required',
     (v: string) => (v.length > 4) || 'Username length must be of 4-20',
     (v: string) => v.length <= 20 || 'Username length must be of 4-20'
   ]
 
-  private password: string = ''
-  private rePassword: string = ''
+  private password: string = 'automurphy'
+  private rePassword: string = 'automurphy'
   private passwordRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Password is required',
-    (v: string) => (v.length > 8) || 'Password length must be of 8-15',
+    (v: string) => (v.length >= 8) || 'Password length must be of 8-15',
     (v: string) => v.length <= 15 || 'Password length must be of 8-15'
     // (_v: string) => (this.password !== this.rePassword) || 'Passwords mismatches'
   ]

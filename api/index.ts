@@ -46,19 +46,17 @@ app.get('/user', hdlAuth.getUser)
 // authentification
 // app.post('/session', hdlAuth.newSession)
 
-/*
 // email validation => activate (set username && password)
 app.put('/validate-account', hdlAuth.validateAccount)
 
 // activate account (user set username && password
-app.put('/activate-account', hdlAuth.activateAccount)
+// app.put('/activate-account', hdlAuth.activateAccount)
 
 // reset-password-1 send an email
-app.post('/reset-password', hdlAuth.resetPassword)
+// app.post('/reset-password', hdlAuth.resetPassword)
 
 // change password
-app.put('/update-password-vid', hdlAuth.updatePasswordVid)
-*/
+// app.put('/update-password-vid', hdlAuth.updatePasswordVid)
 
 //
 // video

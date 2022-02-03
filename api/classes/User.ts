@@ -141,66 +141,54 @@ export class User {
 
    */
   // Get user by email
-
   public static async GetUser (email: string): Promise<User | null> {
-    let r: any
     const db = Db.getInstance()
-    try {
-      r = await db.pool.query(
-        'SELECT * FROM users WHERE email = $1',
-        [email]
-      )
-      if (r.rows.length === 0) {
-        return null
-      }
-    } catch (e:any) {
-      throw AttError.New('GetUSer', e.message)
+    const r = await db.pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    )
+    if (r.rows.length === 0) {
+      return null
     }
     // to camel case
     r.rows[0].validationId = r.rows[0].validation_id
     delete r.rows[0].validation_id
     return Object.assign(new User(email), r.rows[0])
   }
-  /*
+
   // get user by validationId
   public static async GetUserByValidationId (validationId: string): Promise<User | null> {
     const db = Db.getInstance()
-
-    try {
-      const r = await db.pool.query(
-        'SELECT * FROM users WHERE validationId = $1',
-        [validationId]
-      )
-
-      r.rowCount
-    } catch (e:any) {
-      throw AttError.New('GetUserByValidationId', e.message)
+    const r = await db.pool.query(
+      'SELECT * FROM users WHERE validation_id = $1',
+      [validationId]
+    )
+    if (r.rows.length === 0) {
+      return null
     }
-
-    // const dbUser = r.records[0].get('u').properties as IUserProps
-    // const user = new User(dbUser.email)
-    // user.assignPropertiesOf(dbUser)
-    return null
+    // to camel case
+    r.rows[0].validationId = r.rows[0].validation_id
+    delete r.rows[0].validation_id
+    return Object.assign(new User(r.rows[0].email), r.rows[0])
   }
 
   /*
-// get user by validationId
-public static async GetUserByUsername (username: string): Promise<User | null> {
-  const db = Db.getInstance()
+  // get user by username
+  public static async GetUserByUsername (username: string): Promise<User | null> {
+    const db = Db.getInstance()
 
-  const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
-    { username }
-  )
-  if (r.records.length === 0) {
-    return null
+    const r = await db.session.run('MATCH (u:User {username: $username}) RETURN u',
+      { username }
+    )
+    if (r.records.length === 0) {
+      return null
+    }
+    const dbUser = r.records[0].get('u').properties as IUserProps
+    const user = new User(dbUser.email)
+    user.assignPropertiesOf(dbUser)
+    return user
   }
-  const dbUser = r.records[0].get('u').properties as IUserProps
-  const user = new User(dbUser.email)
-  user.assignPropertiesOf(dbUser)
-  return user
-}
 */
-
   // create a new user
   public static async Create (email: string): Promise<User> {
     const u = new User(email)
@@ -219,10 +207,14 @@ public static async GetUserByUsername (username: string): Promise<User | null> {
       if (e.message.startsWith('duplicate key')) {
         // user exists
         // if password is undefined, it means that the user has not completed his registration
-        const user = await this.GetUser(u._email) as User
-        if (!user.password) {
-          throw AttError.New(`user.create: '${email}' is already registered`, `${email} is already registered. Try "Sign in" or "Password lost"`, 400)
+        const user = await this.GetUser(email) as User
+        if (user.password) {
+          throw AttError.New(`user.create: '${email}' is already registered`,
+            `${email} is already registered. Try "Sign in" or "Password lost"`,
+            400)
         }
+        u._uuid = user.uuid
+        u._validationId = user.validationId
       } else {
         throw e
       }

@@ -24,12 +24,10 @@ export const postUser = async (req: express.Request, res: express.Response, next
   }
 }
 
-/*
 // second step for registration
 // just validate validationID (is set for one user
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
 export const validateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
   const { id } = req.body
 
   // get user by validation ID
@@ -37,14 +35,15 @@ export const validateAccount = async (req: express.Request, res: express.Respons
 
   // no user (user === null)
   if (user === null) {
-    res.locals.response = response.setResponse(404, '', 1,
-      `validateAccount failed: bad validation id: ${id}`)
-    next()
-    return
+    next(AttError.New(
+      `auth.validateAccount: bad validation id ${id}`,
+      `bad validation id ${id}`,
+      404)
+    )
   }
   res.status(201).send()
 }
-*/
+
 /*
 // activateAccount
 // user send username && password
