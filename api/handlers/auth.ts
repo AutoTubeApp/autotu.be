@@ -29,13 +29,25 @@ export const postUser = async (req: express.Request, res: express.Response, next
 // http://localhost:3000/auth/validate-account/20674d70-20d8-472a-a88e-22c2db00dfc8?_se=dG9vcm9wQGdtYWlsLmNvbQ%3D%3D
 export const validateAccount = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const { id } = req.body
-
+  let user: User | null
   // get user by validation ID
-  const user = await User.GetUserByValidationId(id)
+  try {
+    user = await User.GetUserByValidationId(id)
+  } catch (e:any) {
+    if (e.message.startsWith('invalid input syntax for type uuid')) {
+      return next(AttError.New(
+        `auth.validateAccount: bad validation id (not an UUID type) ${id}`,
+        `bad validation id ${id}`,
+        404)
+      )
+    } else {
+      return next(e)
+    }
+  }
 
   // no user (user === null)
   if (user === null) {
-    next(AttError.New(
+    return next(AttError.New(
       `auth.validateAccount: bad validation id ${id}`,
       `bad validation id ${id}`,
       404)
@@ -53,37 +65,40 @@ export const activateAccount = async (req: express.Request, res: express.Respons
     password
   } = req.body
 
+  let user: User | null
+  try {
   // check ID (normally useless but...)
-  let user = await User.GetUserByValidationId(id)
-  // no user (user === null)
-  if (user === null) {
-    next(AttError.New(
+    user = await User.GetUserByValidationId(id)
+    // no user (user === null)
+    if (user === null) {
+      return next(AttError.New(
         `auth.activateAccount: bad validation id ${id}`,
         'Don\'t be a fool, you can\'t activate an account with a bad validation id',
         404)
-    )
-  }
+      )
+    }
+    // not null
+    user = user as User
 
-  // not null
-  user = user as User
-
-  // set user password, and username
-  // check if username exists
-  if (await User.UsernameExists(username)) {
-    next(AttError.New(
+    // set user password, and username
+    // check if username exists
+    if (await User.UsernameExists(username)) {
+      return next(AttError.New(
         `username ${username} already exists`,
-        username`${username} already exists`,
+        `Username '${username}' already exists`,
         400)
-    )
+      )
+    }
+
+    user.username = username
+    await user.setPassword(password.trim())
+    user.updateValidationId()
+
+    // save user in DB
+    await user.save()
+  } catch (e) {
+    return next(e)
   }
-
-  user.username = username
-  await user.setPassword(password)
-  // todo uncomment
-  // user.updateValidationId()
-
-  // save user in DB
-  await user.save()
 
   // subscribe to newsletter
   //  just log error
@@ -156,6 +171,7 @@ export const updatePasswordVid = async (req: express.Request, res: express.Respo
     }
   }
 }
+*/
 
 // get user (currently from JWT)
 export const getUser = (req: express.Request, res: express.Response) => {
@@ -164,30 +180,36 @@ export const getUser = (req: express.Request, res: express.Response) => {
 
 // new session (sign in)
 export const newSession = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
-
   let { email } = req.body
-  email = email.toLowerCase()
+  email = email.trim().toLowerCase()
   const { password } = req.body
   try {
     const user = await User.GetUser(email)
     if (user === null) {
-      res.locals.response = response.setResponse(404, 'Authentification failed', 1, `auth failed for ${email} - no such user`)
-      next()
-      return
+      return next(AttError.New(
+        `auth failed for ${email} - no such user`,
+        'Authentification failed',
+        404)
+      )
     }
 
     // if no password (registration not complete)
     if (user.password === undefined) {
-      res.locals.response = response.setResponse(401, 'Authentification failed', 1, `auth failed for ${email} - no password, registration not completed `)
-      next()
-      return
+      return next(AttError.New(
+        `auth failed for ${email} - no password`,
+        'Authentification failed',
+        401)
+      )
     }
-    const isMatch = await compare(password, user.password)
+
+    // check password
+    const isMatch = await compare(password, user.password.toString())
     if (!isMatch) {
-      res.locals.response = response.setResponse(401, 'authentification failed', 1, `auth failed for ${email} - bad password`)
-      next()
-      return
+      return next(AttError.New(
+        `auth failed for ${email} - bad password`,
+        'Authentification failed',
+        401)
+      )
     }
 
     // create access token
@@ -205,17 +227,12 @@ export const newSession = async (req: express.Request, res: express.Response, ne
         expiresIn
       }
     )
-    res.locals.response = response.setResponse(200, '', 1, `${email} sign in`, {
-      token: accessToken
+    logger.info(`user.newSession: user ${user.uuid} (${user.email}) signed in`)
+    res.status(200).json({
+      token: accessToken,
+      expiresIn
     })
-    next()
   } catch (e) {
-    if (e instanceof AttError) {
-      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
-      next()
-    } else {
-      next(e)
-    }
+    next(e)
   }
 }
-*/

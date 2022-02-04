@@ -39,12 +39,11 @@ app.use(
 // register a new user
 app.post('/user', hdlAuth.postUser)
 
-/*
 // get user
 app.get('/user', hdlAuth.getUser)
-*/
+
 // authentification
-// app.post('/session', hdlAuth.newSession)
+app.post('/session', hdlAuth.newSession)
 
 // email validation => activate (set username && password)
 app.put('/validate-account', hdlAuth.validateAccount)
@@ -91,7 +90,7 @@ app.use((err: any, req: express.Request, res: express.Response, _next: express.N
     }
     res.status(err.code).json(response)
   } else {
-    const logMessage = `${req.ip} - ${req.originalUrl} - ${req.method} - ${res.statusMessage} - ${err.message}`
+    const logMessage = `${req.ip} - ${req.originalUrl} - ${req.method} - 500 - ${err.message}`
     logger.error(logMessage)
     res.status(500).send('Oops!')
   }

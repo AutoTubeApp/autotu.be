@@ -94,12 +94,13 @@ export default {
   // auth
   auth: {
     redirect: {
-      login: '/auth/sign-in'
+      login: '/auth/sign-in',
+      home: '/'
     },
     strategies: {
       local: {
         token: {
-          property: 'payload.token',
+          property: 'token',
           global: true,
           required: true,
           type: 'Bearer'
