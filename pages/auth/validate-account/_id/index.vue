@@ -184,12 +184,9 @@ export default class ValidateAccount extends Vue {
         password: this.password,
         username: this.username
       })
-
-      console.log(response)
       const email = response.data.email
 
       // auth request
-      // const response: void | HTTPResponse =
       await this.$auth.loginWith('local', {
         data: {
           email,
@@ -197,7 +194,6 @@ export default class ValidateAccount extends Vue {
         }
       })
     } catch (e:any) {
-      console.log(e)
       this.showSnackbar({
         text: e.response?.data?.message || 'Oops something went wrong',
         color: 'error'
