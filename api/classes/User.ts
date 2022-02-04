@@ -1,19 +1,19 @@
 import { v4 as uuidV4 } from 'uuid'
 import validator from 'validator'
 import { hash } from 'bcrypt'
-
 import Db from '../Db'
 import { AttError } from './Error'
 import { SendInBlue } from './SendInBlue'
 
-/* // User properties (used for assign props to user)
-interface IUserProps {
+// DbRowUser
+interface DbRowUser {
+  id: number
   email: string
-  uuid?: string
-  username?: string
-  password?: string
-  validationId?: string
-} */
+  uuid: string
+  username: string
+  password: string
+  validation_id: string
+}
 
 // Autotube User
 export class User {
@@ -24,12 +24,23 @@ export class User {
   private _password?: string
   private _validationId?: string
 
-  constructor (email: string) {
-    // eslint-disable-next-line import/no-named-as-default-member
-    if (!validator.isEmail(email)) {
-      throw AttError.New(`new user: bad email '${email}'`, `'${email}' is not a valid email`)
+  constructor (dbRow:DbRowUser)
+  constructor (email: string)
+  constructor (data: string | DbRowUser) {
+    if (typeof data === 'string') {
+      // eslint-disable-next-line import/no-named-as-default-member
+      if (!validator.isEmail(data)) {
+        throw AttError.New(`new user: bad email '${data}'`, `'${data}' is not a valid email`)
+      }
+      this._email = this.email.toLowerCase()
+    } else {
+      this._id = data.id
+      this._email = data.email
+      this._uuid = data.uuid
+      this._username = data.username
+      this._password = data.password
+      this._validationId = data.validation_id
     }
-    this._email = email.toLowerCase()
   }
 
   public get id (): number | undefined {
@@ -148,10 +159,8 @@ export class User {
     if (r.rows.length === 0) {
       return null
     }
-    // to camel case
-    r.rows[0].validationId = r.rows[0].validation_id
-    delete r.rows[0].validation_id
-    return Object.assign(new User(email), r.rows[0])
+
+    return new User(r.rows[0])
   }
 
   // get user by validationId
@@ -164,10 +173,7 @@ export class User {
     if (r.rows.length === 0) {
       return null
     }
-    // to camel case
-    r.rows[0].validationId = r.rows[0].validation_id
-    delete r.rows[0].validation_id
-    return Object.assign(new User(r.rows[0].email), r.rows[0])
+    return new User(r.rows[0])
   }
 
   // get user by username
@@ -181,10 +187,7 @@ export class User {
     if (r.rows.length === 0) {
       return null
     }
-    // to camel case
-    r.rows[0].validationId = r.rows[0].validation_id
-    delete r.rows[0].validation_id
-    return Object.assign(new User(r.rows[0].email), r.rows[0])
+    return new User(r.rows[0])
   }
 
   // create a new user
