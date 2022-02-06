@@ -6,6 +6,7 @@ import express from 'express'
 import validator from 'validator'
 import axios from 'axios'
 import { decode } from 'js-base64'
+import { xml2js, js2xml } from 'xml-js'
 
 import logger from '../logger'
 import { AttError } from '../classes/Error'
@@ -108,6 +109,12 @@ export const getProxyfiedManifest = async (req: express.Request, res: express.Re
       res.status(e.response.status).send()
     }
     return
+  }
+  // check if <BaseURL></BaseURL> is present
+  const xmlObj = xml2js(body, { compact: true }) as any
+  if (!xmlObj.MPD.BaseURL) {
+    xmlObj.MPD.BaseURL = manifest.substring(0, manifest.lastIndexOf('/') + 1)
+    body = js2xml(xmlObj, { compact: true, spaces: 2 })
   }
   res.setHeader('Content-Type', 'application/dash+xml')
   res.status(200).send(body)

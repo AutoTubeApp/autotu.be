@@ -115,19 +115,18 @@ export const activateAccount = async (req: express.Request, res: express.Respons
   res.status(201).json(response)
 }
 
-/*
 // reset password
 // email user (if exits) to reset his password
 export const resetPassword = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
   try {
     const { email } = req.body
     const user = await User.GetUser(email)
     if (user === null) {
-      res.locals.response = response.setResponse(404, 'No such user', 1,
-        `resetPassword: no such user ${email}`)
-      next()
-      return
+      return next(AttError.New(
+        `auth.resetPassword: no such user ${email}`,
+        'No such user',
+        404)
+      )
     }
     // new validationId
     user.updateValidationId()
@@ -135,14 +134,12 @@ export const resetPassword = async (req: express.Request, res: express.Response,
     await user.sendResetPasswordEmail()
     res.status(200).send()
   } catch (e) {
-    console.log(e)
     next(e)
   }
 }
 
 // update password by user Validation ID
 export const updatePasswordVid = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const response = new ApiResponse()
   const {
     id,
     password
@@ -152,26 +149,21 @@ export const updatePasswordVid = async (req: express.Request, res: express.Respo
     // Get user
     const user = await User.GetUserByValidationId(id)
     if (user === null) {
-      res.locals.response = response.setResponse(404, 'No such user', 1,
-        `updatePasswordVid: no such user with validation id ${id}`)
-      next()
-      return
+      return next(AttError.New(
+        `auth.updatePasswordVid: no user with validation ID ${id}`,
+        'Bad validation id',
+        404)
+      )
     }
     await user.setPassword(password)
     await user.updateValidationId()
     await user.save()
-    res.locals.response = response.setResponse(201, '', 1, `updatePasswordVid: ${user.uuid} (${user.email}) has changed their password`)
-    next()
+    logger.info(`user.updatePasswordVid: user ${user.uuid} (${user.email}) password updated`)
+    res.status(201).send()
   } catch (e) {
-    if (e instanceof AttError) {
-      res.locals.response = response.setResponse(400, e.userMessage, 1, e.message)
-      next()
-    } else {
-      next(e)
-    }
+    next(e)
   }
 }
-*/
 
 // get user (currently from JWT)
 export const getUser = (req: express.Request, res: express.Response) => {
