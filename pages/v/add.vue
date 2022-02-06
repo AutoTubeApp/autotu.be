@@ -50,7 +50,8 @@
         fluid
       >
         <!--video player-->
-        <VideoPlayer
+
+        <IframeVideoPlayer
           :manifest-url="manifestProxifiedUrl"
           :poster-url="posterUrl"
           @error="handleVideoPlayerError"
@@ -193,11 +194,11 @@ export default class AddVideo extends Vue {
   // process step
   step: number = 1
   // hide step 2
-  step2Visible = false
+  step2Visible = true
 
   // manifest
   private manifestProxifiedUrl = ''
-  manifest: string = 'https://v.autotube.app/dc6-first-landing/dash.mpd'
+  manifest: string = 'https://v.autotube.app/202105-torreilles/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     // eslint-disable-next-line import/no-named-as-default-member
