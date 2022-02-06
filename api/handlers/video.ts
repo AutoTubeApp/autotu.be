@@ -24,11 +24,15 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   // validate is URL && extension is .mpd
   // eslint-disable-next-line import/no-named-as-default-member
   if (!validator.isURL(manifest)) {
-    throw new AttError(`getVideoMetaFromManifest failed: bad URL for manifest: ${manifest}`, 'URL is not valid')
+    return next(AttError.New(
+      `getVideoMetaFromManifest failed: bad URL for manifest: ${manifest}`,
+      'URL is not valid'))
   }
 
   if (manifest.split('.')?.pop()?.toLowerCase() !== 'mpd') {
-    throw new AttError(`getVideoMetaFromManifest failed: bad URL for manifest, not mpd: ${manifest}`, 'URL is not valid')
+    return next(AttError.New(
+      `getVideoMetaFromManifest failed: bad URL for manifest, not mpd: ${manifest}`,
+      'URL is not valid'))
   }
 
   // load mpd file
@@ -37,9 +41,13 @@ export const getVideoMetaFromManifest = async (req: express.Request, res: expres
   } catch (e:any) {
     // 404 not found
     if (e.response.status === 404) {
-      throw new AttError(`getVideoMetaFromManifest failed: manifest not found: ${manifest}`, 'Remote server reply with a "Not Found" error (404). Check your URL.')
+      return next(AttError.New(
+        `getVideoMetaFromManifest failed: manifest not found: ${manifest}`,
+        'Remote server reply with a "Not Found" error (404). Check your URL.'))
     }
-    throw new AttError(`getVideoMetaFromManifest failed: get ${e.reponse.status} - ${e.response.statusText} from remote server: ${manifest}`, `Remote server reply with a error ${e.reponse.statusText}. Check your URL.`)
+    return next(AttError.New(
+      `getVideoMetaFromManifest failed: get ${e.reponse.status} - ${e.response.statusText} from remote server: ${manifest}`,
+      `Remote server reply with a error ${e.reponse.statusText}. Check your URL.`))
   }
 
   // OK manifest exists
