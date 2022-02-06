@@ -5,10 +5,17 @@
       class="mx-auto pa-0"
       cols="12"
     >
+      <v-img
+        v-if="!displayPlayer"
+        :aspect-ratio="16/9"
+        :src="posterSrc"
+        @click="() => {displayPlayer = true}"
+      />
       <iframe
+        v-if="displayPlayer"
         id="iframe-player"
-        src="http://localhost:3001/"
-        title="Sad Woman"
+        :src="iframeSrc"
+        :title="title"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
@@ -26,38 +33,59 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 @Component
 export default class IframeVideoPlayer extends Vue {
   // Props
-  @Prop({ required: true }) readonly manifestUrl!: string
+  // source of the iframe video
+  @Prop({ required: true }) src!: string
+  // title of the iframe video
+  @Prop({ required: true }) readonly title!: string
 
-  // mounted
-  // iframe 100% en largeur du container
-  // video 100% aussi
+  // Data
+  private displayPlayer: boolean = false
 
   // methods
   mounted () {
-    console.log('IframeVideoPlayer mounted')
-    window.addEventListener('message', this.videoLoaded, { once: true })
+    window.addEventListener('message', this.videoLoaded)
   }
 
   beforeDestroy () {
     window.removeEventListener('message', this.videoLoaded)
   }
 
-  private iframeLoaded = () => {
-    console.log('iframe loaded')
+  private static playVideo () {
+    const iframe = document.getElementById('iframe-player') as HTMLIFrameElement
+    if (iframe) {
+      iframe.contentWindow!.postMessage('play', '*')
+    }
   }
 
-  private videoLoaded = (evt: Event) => {
-    console.log('video loaded')
-    // console.log(evt)
+  private iframeLoaded = () => {
+    // console.log('iframe loaded')
+  }
+
+  private videoLoaded = (evt:any) => {
+    if (evt.data === 'video_loaded') {
+      IframeVideoPlayer.playVideo()
+    }
   }
 
   private handleError = (e: Error) => {
     this.$emit('error', e)
   }
+
+  // computed
+  get iframeSrc (): string {
+    return `${this.src}/embed.html`
+  }
+
+  get posterSrc (): string {
+    return `${this.src}/thumbnail-play.jpg`
+  }
 }
 </script>
 
 <style>
+#iframe-container {
+  cursor: pointer;
+}
 #iframe-player {
   border: 0;
   width: 100%;

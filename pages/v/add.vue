@@ -50,10 +50,9 @@
         fluid
       >
         <!--video player-->
-
         <IframeVideoPlayer
-          :manifest-url="manifestProxifiedUrl"
-          :poster-url="posterUrl"
+          :src="videoPackageSrc"
+          :title="title"
           @error="handleVideoPlayerError"
           @loaded="handleVideoLoaded"
         />
@@ -163,7 +162,7 @@
 // todo form submit
 import { Component, namespace, Vue } from 'nuxt-property-decorator'
 import validator from 'validator'
-import { encode } from 'js-base64'
+// import { encode } from 'js-base64'
 
 import VideoPlayer from '~/components/VideoPlayer.vue'
 
@@ -197,14 +196,18 @@ export default class AddVideo extends Vue {
   step2Visible = true
 
   // manifest
-  private manifestProxifiedUrl = ''
-  manifest: string = 'https://v.autotube.app/202105-torreilles/dash.mpd'
+  // todo empty var
+  manifest: string = 'https://dash.s3-website.fr-par.scw.cloud/sad-woman/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     // eslint-disable-next-line import/no-named-as-default-member
     (v: string) => validator.isURL(v) || 'URL is not valid',
     (v: string) => v.split('.')?.pop()?.toLowerCase() === 'mpd' || 'dash manifest must have .mpd extension'
   ]
+
+  private iframeSrc: string = ''
+  private posterSrc: string = ''
+  private videoPackageSrc: string = ''
 
   // form step 2
   formIsValid: boolean = false
@@ -221,9 +224,6 @@ export default class AddVideo extends Vue {
   playlistToAdd: string = ''
   // tags
   tags: string = ''
-
-  // for VideoPlayer props
-  posterUrl: string = ''
 
   // store
   @NsSnackbarStore.Action
@@ -242,9 +242,9 @@ export default class AddVideo extends Vue {
         manifest: this.manifest
       })
 
-      // ok
-      // get posterURL
-      this.posterUrl = this.manifest.split('/').slice(0, -1).join('/') + '/thumbnail.jpg'
+      this.videoPackageSrc = this.manifest.split('/').slice(0, -1).join('/')
+      /*      this.iframeSrc = `${baseURL}/embed.html`
+      this.posterSrc = `${baseURL}` */
 
       // get meta
       const meta = r.data
@@ -260,7 +260,7 @@ export default class AddVideo extends Vue {
         this.tags = meta.tags?.join(', ') || ''
       }
       // manifest URL for the player (through local proxy to avoid CORS)
-      this.manifestProxifiedUrl = '/api/v/get-proxyfied-manifest?u=' + encode(this.manifest)
+      // this.manifestProxifiedUrl = '/api/v/get-proxyfied-manifest?u=' + encode(this.manifest)
       // show step 2 form
       this.step = 2
     } catch (e:any) {
