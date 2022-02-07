@@ -9,6 +9,7 @@
         v-if="!displayPlayer"
         :aspect-ratio="16/9"
         :src="posterSrc"
+        class="mb-1"
         @click="() => {displayPlayer = true}"
       />
       <iframe

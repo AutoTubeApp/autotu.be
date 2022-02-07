@@ -259,6 +259,10 @@ export default class AddVideo extends Vue {
         }
         this.tags = meta.tags?.join(', ') || ''
       }
+
+      // todo check embed.html checksum
+      // todo get mpd checksum
+
       // manifest URL for the player (through local proxy to avoid CORS)
       // this.manifestProxifiedUrl = '/api/v/get-proxyfied-manifest?u=' + encode(this.manifest)
       // show step 2 form
