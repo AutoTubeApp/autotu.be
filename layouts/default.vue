@@ -49,7 +49,7 @@
         </v-icon>
       </v-btn>
       <v-spacer />
-      <nuxtLink to="/v/add">
+      <nuxtLink to="/v/add" style="text-decoration: none; color: inherit;">
         <v-icon v-if="$auth.loggedIn">
           mdi-movie-plus
         </v-icon>
