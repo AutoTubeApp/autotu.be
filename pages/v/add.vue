@@ -197,7 +197,8 @@ export default class AddVideo extends Vue {
 
   // manifest
   // todo empty var
-  manifest: string = 'https://dash.s3-website.fr-par.scw.cloud/sad-woman/dash.mpd'
+  // manifest: string = 'https://v.autotube.app/umbrella/dash.mpd'
+  manifest: string = 'https://v.autotube.app/mysterious-pale-looking/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     // eslint-disable-next-line import/no-named-as-default-member

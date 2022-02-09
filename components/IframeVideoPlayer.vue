@@ -63,7 +63,7 @@ export default class IframeVideoPlayer extends Vue {
   }
 
   private videoLoaded = (evt:any) => {
-    if (evt.data === 'video_loaded') {
+    if (evt.data === 'att-video-loaded') {
       IframeVideoPlayer.playVideo()
     }
   }
@@ -74,7 +74,7 @@ export default class IframeVideoPlayer extends Vue {
 
   // computed
   get iframeSrc (): string {
-    return `${this.src}/embed.html`
+    return `${this.src}/embed-dyn.html`
   }
 
   get posterSrc (): string {

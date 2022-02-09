@@ -49,10 +49,11 @@
         </v-icon>
       </v-btn>
       <v-spacer />
-
-      <v-icon v-if="$auth.loggedIn">
-        mdi-movie-plus
-      </v-icon>
+      <nuxtLink to="/v/add">
+        <v-icon v-if="$auth.loggedIn">
+          mdi-movie-plus
+        </v-icon>
+      </nuxtLink>
       <v-icon v-if="$auth.loggedIn" class="ml-5">
         mdi-bell
       </v-icon>
@@ -85,6 +86,7 @@
               <v-list-item-title>Logout</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+
           <nuxtLink to="/account">
             <v-list-item nuxt>
               <v-list-item-icon>
@@ -167,5 +169,17 @@ export default class Default extends Vue {
 </script>
 
 <style scoped>
+/* home route and active route will show in bold as it matches / and /about */
+a.nuxt-link-active  {
+  text-decoration: none!important;
+}
+
+a.nuxt-link-exact-active  {
+  text-decoration: none!important;
+}
+
+a.nuxt-link-exact-active i {
+  color: #42A5F5;
+}
 
 </style>
