@@ -58,7 +58,7 @@
         />
 
         <!--title-->
-        <v-form class="mt-6">
+        <v-form class="mt-4">
           <v-text-field
             v-model="title"
             filled
@@ -197,8 +197,8 @@ export default class AddVideo extends Vue {
 
   // manifest
   // todo empty var
-  // manifest: string = 'https://v.autotube.app/umbrella/dash.mpd'
-  manifest: string = 'https://v.autotube.app/mysterious-pale-looking/dash.mpd'
+  manifest: string = 'https://v.autotube.app/umbrella/dash.mpd'
+  // manifest: string = 'https://v.autotube.app/mysterious-pale-looking/dash.mpd'
   private manifestRules: ((v: string) => string | boolean)[] = [
     (v: string) => !!v || 'Manifest is required',
     // eslint-disable-next-line import/no-named-as-default-member
@@ -322,7 +322,7 @@ export default class AddVideo extends Vue {
 
   // when video is loaded
   private handleVideoLoaded (): void {
-    this.step2Visible = true
+    // this.step2Visible = true
   }
 }
 
