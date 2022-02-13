@@ -125,15 +125,15 @@ export default class IframeVideoPlayer extends Vue {
     if (evt.data === 'att-video-loaded') {
       console.log('att-video-loaded')
       this.displayWaitingOverlay = false
+      this.showPlayer = true
       IframeVideoPlayer.playVideo()
       this.getIframe().contentWindow!.postMessage('att-controls-hide', '*')
       setTimeout(() => {
         this.displayThumbnail = false
-        this.showPlayer = true
-        this.getIframe().contentWindow!.postMessage('att-controls-hide', '*')
-      }, 100)
+        // this.getIframe().contentWindow!.postMessage('att-controls-hide', '*')
+      }, 50)
     }
-    if (evt.data.type === 'player-size') {
+    if (evt.data.type === 'att-player-size') {
       const playerSize: IFrameMessage = evt.data
       console.log(evt.data)
       this.resizeIframe(playerSize)
@@ -163,13 +163,12 @@ export default class IframeVideoPlayer extends Vue {
 
 #main {
   width: 100%;
-  aspect-ratio: 16/9 !important;
 }
 
 #media-container {
   cursor: pointer;
   max-width: 600px;
-  aspect-ratio: inherit;
+  aspect-ratio: 16/9;
 }
 
 #iframe-player {
@@ -183,7 +182,7 @@ export default class IframeVideoPlayer extends Vue {
   transition: opacity 1s;
 }
 
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
+.fade-enter, .fade-leave-to
 {
   position: absolute;
   opacity: 0;
